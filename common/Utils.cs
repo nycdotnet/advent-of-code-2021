@@ -4,8 +4,8 @@
     {
         public static ParallelQuery<int> GetInputAsIntegers(string fileName) => GetLines(fileName)
             .AsParallel()
-            .AsOrdered() // PLINQ is not guaranteed to be ordered unlike linq to objects
             .Where(x => !string.IsNullOrWhiteSpace(x))
+            .AsOrdered() // PLINQ is not guaranteed to be ordered unlike linq to objects
             .Select(x => int.Parse(x));
 
         public static string[] GetLines(string fileName) =>
