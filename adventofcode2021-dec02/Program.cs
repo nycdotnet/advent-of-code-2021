@@ -22,16 +22,16 @@ int PrintDayTwoPartOneAnswer(string inputFileName)
         .Where(x => !string.IsNullOrEmpty(x))
         .Select(x => x.Split(' '))
         .Select(x => (direction: Enum.Parse<Direction>(x[0], true), amount: int.Parse(x[1])))
-        .Aggregate((depth: 0, position: 0), (prev, next) => (
-            depth: prev.depth + next.direction switch
+        .Aggregate((depth: 0, position: 0), (prev, current) => (
+            depth: prev.depth + current.direction switch
             {
-                Direction.up => -next.amount, // up means "less" depth
-                Direction.down => next.amount, // down means "more" depth
+                Direction.up => -current.amount, // up means "less" depth
+                Direction.down => current.amount, // down means "more" depth
                 _ => 0
             },
-            position: prev.position + next.direction switch
+            position: prev.position + current.direction switch
             {
-                Direction.forward => next.amount,
+                Direction.forward => current.amount,
                 _ => 0
             }));
 
@@ -46,26 +46,26 @@ int PrintDayTwoPartTwoAnswer(string inputFileName)
 
     var result = GetLines(inputFileName)
         // note because this must run over every element in the sequence and each result depends on the previous one,
-        // it doesn't make much sense to do in parallel.  Runs in ~8ms even in debug mode on my machine as serial Linq,
-        // so basically not needed anyway
+        // it doesn't make much sense to do in parallel.  Runs in ~5ms even in debug mode on my machine as "regular" Linq,
+        // so basically not needed anyway.
         .Where(x => !string.IsNullOrEmpty(x))
         .Select(x => x.Split(' '))
         .Select(x => (direction: Enum.Parse<Direction>(x[0], true), amount: int.Parse(x[1])))
-        .Aggregate((depth: 0, position: 0, aim: 0), (prev, next) => (
-            depth: prev.depth + next.direction switch
+        .Aggregate((depth: 0, position: 0, aim: 0), (prev, current) => (
+            depth: prev.depth + current.direction switch
             {
-                Direction.forward => prev.aim * next.amount,
+                Direction.forward => prev.aim * current.amount,
                 _ => 0
             },
-            position: prev.position + next.direction switch
+            position: prev.position + current.direction switch
             {
-                Direction.forward => next.amount,
+                Direction.forward => current.amount,
                 _ => 0
             },
-            aim: prev.aim + next.direction switch
+            aim: prev.aim + current.direction switch
             {
-                Direction.down => next.amount,
-                Direction.up => -next.amount,
+                Direction.down => current.amount,
+                Direction.up => -current.amount,
                 _ => 0
             }));
 
