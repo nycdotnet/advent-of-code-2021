@@ -2,7 +2,8 @@
 //var inputTextFileName = "example-input1.txt";
 var inputTextFileName = "myPuzzleInput1.txt";
 
-PrintDayOnePartOneAnswer(inputTextFileName);
+//PrintDayOnePartOneAnswer(inputTextFileName);
+PrintDayOnePartTwoAnswer(inputTextFileName);
 
 void PrintDayOnePartOneAnswer(string inputFileName)
 {
@@ -10,6 +11,35 @@ void PrintDayOnePartOneAnswer(string inputFileName)
     var depthMeasurements = GetInputAsIntegerArray(inputFileName);
     var depthIncreases = NumberOfTimesDepthIncreases(depthMeasurements);
     Console.WriteLine($"The depth increases {depthIncreases} times.");
+}
+
+void PrintDayOnePartTwoAnswer(string inputFileName)
+{
+    Console.WriteLine($"Solving Advent Of Code 2021 Day 1 Part Two using {inputFileName}.");
+    var depthMeasurements = GetInputAsIntegerArray(inputFileName);
+    var depthIncreases = NumberOfTimesDepthIncreasesSlidingWindow(depthMeasurements, 3);
+    Console.WriteLine($"The depth increases {depthIncreases} times.");
+}
+
+int NumberOfTimesDepthIncreasesSlidingWindow(int[] measurements, int windowSize)
+{
+    const int windowOffset = 1;
+    if (measurements.Length < windowSize + windowOffset)
+    {
+        return 0;
+    }
+    var result = 0;
+    var current = measurements.Take(windowSize).Sum();
+    for (var i = 0; i < measurements.Length - windowSize + windowOffset; i++)
+    {
+        var next = measurements.Skip(i + windowOffset).Take(windowSize).Sum();
+        if (current < next)
+        {
+            result++;
+        }
+        current = next;
+    }
+    return result;
 }
 
 int NumberOfTimesDepthIncreases(int[] measurements)
