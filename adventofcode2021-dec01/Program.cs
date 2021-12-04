@@ -1,4 +1,5 @@
-﻿
+﻿using static common.Utils;
+
 //var inputTextFileName = "example-input1.txt";
 var inputTextFileName = "myPuzzleInput1.txt";
 
@@ -54,15 +55,3 @@ int NumberOfTimesDepthIncreases(int[] measurements)
     }
     return result;
 }
-
-int[] GetInputAsIntegerArray(string fileName) => GetLines(fileName)
-    .AsParallel()
-    .Where(x => !string.IsNullOrWhiteSpace(x))
-    .Select(x => int.Parse(x))
-    .ToArray();
-
-string[] GetLines(string fileName) =>
-    File.ReadAllText(Path.Combine(ProjectFolder(), fileName))
-    .Split("\r\n");
-
-string ProjectFolder() => Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\"));
