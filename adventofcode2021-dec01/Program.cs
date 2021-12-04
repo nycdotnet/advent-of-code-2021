@@ -1,25 +1,33 @@
-﻿using static common.Utils;
+﻿using System.Diagnostics;
+using static common.Utils;
 
 //var inputTextFileName = "example-input1.txt";
 var inputTextFileName = "myPuzzleInput1.txt";
 
-//PrintDayOnePartOneAnswer(inputTextFileName);
-PrintDayOnePartTwoAnswer(inputTextFileName);
+var part1Answer = PrintDayOnePartOneAnswer(inputTextFileName);
 
-void PrintDayOnePartOneAnswer(string inputFileName)
+Debug.Assert(part1Answer == 1553);
+
+var part2Answer = PrintDayOnePartTwoAnswer(inputTextFileName);
+
+Debug.Assert(part2Answer == 1597);
+
+int PrintDayOnePartOneAnswer(string inputFileName)
 {
     Console.WriteLine($"Solving Advent Of Code 2021 Day 1 Part One using {inputFileName}.");
-    var depthMeasurements = GetInputAsIntegerArray(inputFileName);
+    var depthMeasurements = GetInputAsIntegers(inputFileName).ToArray();
     var depthIncreases = NumberOfTimesDepthIncreases(depthMeasurements);
     Console.WriteLine($"The depth increases {depthIncreases} times.");
+    return depthIncreases;
 }
 
-void PrintDayOnePartTwoAnswer(string inputFileName)
+int PrintDayOnePartTwoAnswer(string inputFileName)
 {
     Console.WriteLine($"Solving Advent Of Code 2021 Day 1 Part Two using {inputFileName}.");
-    var depthMeasurements = GetInputAsIntegerArray(inputFileName);
+    var depthMeasurements = GetInputAsIntegers(inputFileName).ToArray();
     var depthIncreases = NumberOfTimesDepthIncreasesSlidingWindow(depthMeasurements, 3);
     Console.WriteLine($"The depth increases {depthIncreases} times.");
+    return depthIncreases;
 }
 
 int NumberOfTimesDepthIncreasesSlidingWindow(int[] measurements, int windowSize)
