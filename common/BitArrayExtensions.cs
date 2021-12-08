@@ -1,0 +1,135 @@
+﻿using System.Collections;
+using System.Collections.Specialized;
+
+namespace common.BitArrayExtensionMethods
+{
+    public static class BitArrayExtensions
+    {
+        /// <summary>
+        /// Tries to convert a string such as "010100010001010010" into a
+        /// <see cref="BitArray"/>.  If successful, returns true and sets
+        /// the <paramref name="result"/>.  If unsuccessful, returns false
+        /// and the <see cref="BitArray"/> will be null.  Should not throw
+        /// any exceptions except OutOfMemory exception.
+        /// </summary>
+        public static bool TryParseToBitArray(this string s, out BitArray? result)
+        {
+            result = null;
+            if (s is null)
+            {
+                return false;
+            }
+
+            var ba = new BitArray(s.Length, false);
+            for (int i = 0; i < s.Length; i++)
+            {
+                switch (s[i])
+                {
+                    case '1':
+                        ba.Set(i, true);
+                        break;
+                    case '0':
+                        continue;
+                    default:
+                        return false;
+                }
+            }
+            result = ba;
+            return true;
+        }
+
+        /// <summary>
+        /// Converts <paramref name="i"/> to a <see cref="BitArray"/> of
+        /// length <paramref name="length"/>.  If length is not specified,
+        /// the length of the result will be 32.
+        /// </summary>
+        public static BitArray ToBitArray(this int i, int length = 0)
+        {
+            var ba = new BitArray(new int[] { i });
+            if (length == 0)
+            {
+                return ba;
+            }
+
+            var result = new BitArray(length);
+            for (var j = 0; j < length; j++)
+            {
+                // note we have to reverse the order here hence length - j - 1.
+                // might be interesting to explore the perf of this versus casting
+                // the original BitArray to bool
+                result.Set(length - j - 1, ba.Get(j));
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Tries to convert a string composed of only 0 and 1 such as "010100010001010010" into a
+        /// <see cref="BitVector32"/>.  If successful, returns true and sets the
+        /// <paramref name="result"/>.  If unsuccessful, returns false and the
+        /// <see cref="BitArray"/> will be null.  Will always fail if <paramref name="s"/> is null
+        /// or longer than 32 characters.
+        /// </summary>
+        public static bool TryParseToBitVector32(this string s, out BitVector32? result)
+        {
+            if (s is null || s.Length > 32)
+            {
+                result = null;
+                return false;
+            }
+            try
+            {
+                result = new BitVector32(Convert.ToInt32(s, 2));
+                return true;
+            }
+            catch (Exception)
+            {
+                result = null;
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Formats the contents of a bit array as a string of characters
+        /// in index order, i.e. the index 0 of the BitArray will be the first
+        /// character in the returned string.  False bits are formatted as
+        /// <paramref name="falseCharacter"/>, which defaults to '0', and true
+        /// bits are formatted as <paramref name="trueCharacter"/>, which defaults
+        /// to '1'.
+        /// </summary>
+        /// <seealso cref="https://docs.microsoft.com/en-us/dotnet/csharp/how-to/modify-string-contents#programmatically-build-up-string-content"/>
+        public static string Format(this BitArray ba, char falseCharacter = '0', char trueCharacter = '1') =>
+            string.Create(ba.Length, new char[ba.Length], (Span<char> result, char[] _) => {
+                for (int i = 0; i < ba.Length; i++)
+                {
+                    result[i] = ba.Get(i) ? trueCharacter : falseCharacter;
+                }
+            });
+
+        /// <summary>
+        /// Converts the bits in <paramref name="ba"/> to a <see cref="uint"/> in a manner where the last bit
+        /// in the <paramref name="ba"/> is the least significant.  If there are more than 32 bits in
+        /// <paramref name="ba"/>, will throw.
+        /// </summary>
+        /// <remarks>
+        /// Adapted from Marc Gravel's answer at https://stackoverflow.com/questions/713057/convert-bool-to-byte
+        /// </remarks>
+        public static uint ToUInt32(this BitArray ba)
+        {
+            if (ba.Length > 32)
+            {
+                throw new ArgumentException(message: $"The {nameof(ToUInt32)} extension method does not support {nameof(BitArray)} parameters with more than 32 bits.", paramName: nameof(ba));
+            }
+            var result = 0u;
+            var bit = 1u;
+            for (var i = ba.Length - 1; i >= 0; i--)
+            {
+                if (ba[i])
+                {
+                    result |= bit;
+                }
+                bit <<= 1;
+            }
+            return result;
+        }
+    }
+}
