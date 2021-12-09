@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Specialized;
+using System.Numerics;
 
 namespace common.BitArrayExtensionMethods
 {
@@ -60,6 +61,22 @@ namespace common.BitArrayExtensionMethods
                 result.Set(length - j - 1, ba.Get(j));
             }
             return result;
+        }
+
+        /// <summary>
+        /// Returns the number of set bits in <paramref name="ba"/>.
+        /// Adapted from https://stackoverflow.com/questions/5063178/counting-bits-set-in-a-net-bitarray-class
+        /// </summary>
+        public static int Cardinality(this BitArray ba)
+        {
+            var uints = new uint[(ba.Count >> 5) + 1];
+            ba.CopyTo(uints, 0);
+            var count = 0;
+            for (var i = 0; i < uints.Length; i++)
+            {
+                count += BitOperations.PopCount(uints[i]);
+            }
+            return count;
         }
 
         /// <summary>

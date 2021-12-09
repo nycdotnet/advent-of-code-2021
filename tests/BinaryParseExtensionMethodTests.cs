@@ -1,6 +1,7 @@
 using common.BitArrayExtensionMethods;
 using FluentAssertions;
 using System;
+using System.Collections;
 using System.Collections.Specialized;
 using Xunit;
 
@@ -76,6 +77,18 @@ namespace tests
         {
             var result = Convert.ToInt32(input, 2);
             result.Should().Be(expected);
+        }
+
+        [Theory]
+        [InlineData(0, 0)]
+        [InlineData(-1, 32)]
+        [InlineData(1, 1)]
+        [InlineData(2, 1)]
+        [InlineData(3, 2)]
+        public void BitArrayCardinalityExtensionWorksAsExpected(int bitArraySeedValue, int expectedCardinality)
+        {
+            var ba = new BitArray(new int[] { bitArraySeedValue });
+            ba.Cardinality().Should().Be(expectedCardinality);
         }
 
         [Theory]
@@ -182,6 +195,5 @@ namespace tests
         const short BitsInANibble = 4;
         const short NibbleMaxValue = 8;
         const short BitsInAnInt = 32;
-
     }
 }

@@ -7,7 +7,10 @@ using static common.Utils;
 var inputTextFileName = "myPuzzleInput.txt";
 
 var part1Answer = PrintDay3PartOneAnswer(inputTextFileName);
-Debug.Assert(part1Answer == 2498354); // correct answer but fairly certain could have been arrived at better.
+Debug.Assert(part1Answer == 2498354);
+
+var part2Answer = PrintDay3PartTwoAnswer(inputTextFileName);
+Debug.Assert(part2Answer == 3277956);
 
 uint PrintDay3PartOneAnswer(string inputTextFileName)
 {
@@ -23,7 +26,7 @@ uint PrintDay3PartOneAnswer(string inputTextFileName)
            }
            return bits;
        })
-       .ToArray();
+       .ToList();
 
     var gamma = GetGammaBits(bits).ToUInt32();
     var epsilon = GetEpsilonBits(bits).ToUInt32();
@@ -33,29 +36,89 @@ uint PrintDay3PartOneAnswer(string inputTextFileName)
     return product;
 }
 
-BitArray GetEpsilonBits(BitArray[] arrays)
+uint PrintDay3PartTwoAnswer(string inputTextFileName)
+{
+    Console.WriteLine($"Solving Advent Of Code 2021 Day 3 Part Two using {inputTextFileName}.");
+    Console.WriteLine("Binary Diagnostic");
+
+    var bits = GetLines(inputTextFileName)
+       .Select(s => {
+           var parsed = s.TryParseToBitArray(out var bits);
+           if (bits is null || !parsed)
+           {
+               throw new FormatException($"Could not parse {s} to a {nameof(BitArray)}");
+           }
+           return bits;
+       })
+       .ToArray();
+
+    var oxygenGeneratorRating = GetOxygenRating(bits).ToUInt32();
+    var co2ScrubberRating = GetCO2ScrubberRating(bits).ToUInt32();
+
+    var lifeSupportRating = oxygenGeneratorRating * co2ScrubberRating;
+
+    Console.WriteLine($"The O2 Generator Rating is {oxygenGeneratorRating} and the CO2 Scrubber Rating is {co2ScrubberRating}.  The life support rating is {lifeSupportRating}.");
+
+    return lifeSupportRating;
+}
+
+BitArray GetOxygenRating(BitArray[] logItems) =>
+    GetLifeSupportRating(logItems, (trueCount, falseCount) => trueCount < falseCount);
+
+BitArray GetCO2ScrubberRating(BitArray[] logItems) =>
+    GetLifeSupportRating(logItems, (trueCount, falseCount) => trueCount >= falseCount);
+
+
+BitArray GetLifeSupportRating(BitArray[] logItems, Func<int, int, bool> criteriaForRemoval)
 {
     // unfortunately we don't know that the data will be "rectangular",
     // so we have to prove that it is so we can use it safely.
-    var width = GetConsistentCountOrThrow(arrays);
+    var width = GetConsistentCountOrThrow(logItems);
+
+    var interestingLogItems = logItems.ToList();
+    for (var bitIndex = 0; bitIndex < width; bitIndex++)
+    {
+        var (trueCount, falseCount) = CountBits(interestingLogItems, bitIndex);
+        var removeWhere = criteriaForRemoval(trueCount, falseCount);
+        interestingLogItems.RemoveAll(x => x[bitIndex] == removeWhere);
+        if (interestingLogItems.Count == 1)
+        {
+            break;
+        }
+    }
+
+    return interestingLogItems.Single();
+}
+
+(int trueCount, int falseCount) CountBits(List<BitArray> logItems, int bitIndex)
+{
+    var trueCount = 0;
+    var falseCount = 0;
+
+    for (var j = 0; j < logItems.Count; j++)
+    {
+        if (logItems[j][bitIndex])
+        {
+            trueCount++;
+        }
+        else
+        {
+            falseCount++;
+        }
+    }
+    return (trueCount, falseCount);
+}
+
+BitArray GetEpsilonBits(List<BitArray> logItems)
+{
+    // unfortunately we don't know that the data will be "rectangular",
+    // so we have to prove that it is so we can use it safely.
+    var width = GetConsistentCountOrThrow(logItems);
 
     var bits = new BitArray(width, true);
     for (var i = 0; i < width; i++)
     {
-        var trueCount = 0;
-        var falseCount = 0;
-
-        for (var j = 0; j < arrays.Length; j++)
-        {
-            if (arrays[j][i])
-            {
-                trueCount++;
-            }
-            else
-            {
-                falseCount++;
-            }
-        }
+        var (trueCount, falseCount) = CountBits(logItems, i);
         if (falseCount < trueCount)
         {
             bits.Set(i, false);
@@ -64,29 +127,16 @@ BitArray GetEpsilonBits(BitArray[] arrays)
     return bits;
 }
 
-BitArray GetGammaBits(BitArray[] arrays)
+BitArray GetGammaBits(List<BitArray> logItems)
 {
     // unfortunately we don't know that the data will be "rectangular",
     // so we have to prove that it is so we can use it safely.
-    var width = GetConsistentCountOrThrow(arrays);
+    var width = GetConsistentCountOrThrow(logItems);
 
     var bits = new BitArray(width, false);
     for (var i = 0; i < width; i++)
     {
-        var trueCount = 0;
-        var falseCount = 0;
-
-        for (var j = 0; j < arrays.Length; j++)
-        {
-            if(arrays[j][i])
-            {
-                trueCount++;
-            }
-            else
-            {
-                falseCount++;
-            }
-        }
+        var (trueCount, falseCount) = CountBits(logItems, i);
         if (trueCount > falseCount)
         {
             bits.Set(i, true);
