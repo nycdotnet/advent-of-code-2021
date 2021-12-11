@@ -37,5 +37,5 @@ I am adding this commentary section because everyone loves my opinions.
   * This one had the same program for part 1 and part 2 - they just asked you to filter out diagonals in part 1 and I did this by making the solution method take a predicate to apply to the input data.
   * This is also the first time I've worked with named RegEx capture groups.  I'm curious of the performance when getting by name vs index, but it certainly seemed fast to me.  The colorization of RegEx strings in VS 2019/2022 is pretty nice.
 
-## Day 6:
+### Day 6:
   * This was the first time the most obvious approach had scaling problems once the number of iterations grew.  Since simulating the fish just required knowing the count of each fish in a certain state, it was straight-forward to refactor the implementation to use a `Dictionary<int,long>`.  Using the naive `List<int>` approach, the debugger console was showing major allocations and the fans definitely spun up on my laptop!
