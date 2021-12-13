@@ -43,3 +43,10 @@ I am adding this commentary section because everyone loves my opinions.
 ### Day 7:
   * The first part of the problem was a clear use case for Median.  I was reminded yet again that there is not a median method built-in to .NET, so I used the `MathNet.Numerics` package which has this and many other statistical functions.  I am doing this project contemporaneously with the Log4j RCE vulnerability causing chaos in the Java ecosystem (read: everywhere), and part of me was thinking it wouldn't be worth bringing in a library to do this.  So this might be something to consider, but there's also a risk when writing something like this yourself - it's unlikely that a solution you come up with will be optimal in speed (not only algorithmically, but also with regards to things like SIMD and other modern processor instruction sets) and you may miss edge cases.  So there's always trade-offs.
   * The second part made me think of a loading screen message in HOI 4 - Precalculating Naval Distances - I wonder if that's a real thing or just baloney like "reticulating splines".
+
+### Day 8:
+  * Goodness this was a tricky one.  I puzzled through it with my wife because we had to devise an algorithm to walk through the strokes to get to the mapping.
+  * The algorithm used several short arrays and I want to look into renting them in a future iteration.
+
+
+

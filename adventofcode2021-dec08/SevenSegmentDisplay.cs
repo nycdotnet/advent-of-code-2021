@@ -1,14 +1,49 @@
-﻿namespace adventofcode2021_dec08
+﻿using System.Collections.Immutable;
+using System.Numerics;
+
+namespace adventofcode2021_dec08
 {
     public class SevenSegmentDisplay
     {
         public SevenSegmentDisplay()
         {
-            state = NumberStates[0];
+            state = NumberToState[0];
         }
         public SevenSegmentDisplay(int number)
         {
-            SetNumber(number);
+             Number = number;
+        }
+        public SevenSegmentDisplay(IEnumerable<char> segments)
+        {
+            foreach (var segment in segments)
+            {
+                switch (segment)
+                {
+                    case 'a':
+                        SegmentA = true;
+                        break;
+                    case 'b':
+                        SegmentB = true;
+                        break;
+                    case 'c':
+                        SegmentC = true;
+                        break;
+                    case 'd':
+                        SegmentD = true;
+                        break;
+                    case 'e':
+                        SegmentE = true;
+                        break;
+                    case 'f':
+                        SegmentF = true;
+                        break;
+                    case 'g':
+                        SegmentG = true;
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
 
         private byte state;
@@ -47,13 +82,17 @@
             get => (state & SegmentGMask) > 0;
             set => state |= SegmentGMask;
         }
-        public void SetNumber(int number)
+
+        public int Number
         {
-            if (number < 0 || number > 9)
-            {
-                throw new ArgumentOutOfRangeException(paramName: nameof(number), message: $"Can't set a seven segment display to value {number}");
+            get => StateToNumber[state];
+            set {
+                if (value < 0 || value > 9)
+                {
+                    throw new ArgumentOutOfRangeException(paramName: nameof(Number), message: $"Can't set a seven segment display to value {value}");
+                }
+                state = NumberToState[value];
             }
-            state = NumberStates[number];
         }
 
         public void ConsoleRender()
@@ -105,7 +144,7 @@
 
         public byte State => state;
 
-        private static readonly Dictionary<int, byte> NumberStates = new() {
+        private static readonly Dictionary<int, byte> NumberToState = new() {
             { 0, 119 },
             { 1, 36 },
             { 2, 93 },
@@ -117,6 +156,29 @@
             { 8, 127 },
             { 9, 111 }
         };
+
+        private static readonly Dictionary<byte, int> StateToNumber = NumberToState
+            .ToDictionary(x => x.Value, x => x.Key);
+
+        public int Cardinality()
+        {
+            return BitOperations.PopCount(State);
+        }
+
+        /// <summary>
+        /// If a seven segment display shows these number of segments on, then the value must
+        /// be one of the returned sets of integers.
+        /// </summary>
+        public static readonly ImmutableDictionary<int, int[]> CardinalityToPossibleValues =
+            new Dictionary<int, int[]> {
+                { 2, new int[] { 1 } },
+                { 3, new int[] { 7 } },
+                { 4, new int[] { 4 } },
+                { 5, new int[] { 2, 3, 5 } },
+                { 6, new int[] { 0, 6, 9 } },
+                { 7, new int[] { 8 } },
+            }
+            .ToImmutableDictionary();
 
         // inspiration from https://stackoverflow.com/questions/4854207/get-a-specific-bit-from-byte
         const byte SegmentAMask = 1 << 0;
