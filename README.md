@@ -46,7 +46,7 @@ I am adding this commentary section because everyone loves my opinions.
 
 ### Day 8:
   * Goodness this was a tricky one.  I puzzled through it with my wife because we had to devise an algorithm to walk through the strokes to get to the mapping.
-  * The algorithm used several short arrays and I want to look into renting them in a future iteration.
+  * The algorithm used several short arrays.  It might be interesting to look into [renting](https://www.dotnetperls.com/arraypool) them in a future iteration, but the API for this is fairly intense and it'd muddy up the logic.  In particular I don't care for how the API makes you have to keep track of how big the array is supposed to be as the array you rent is allowed to be bigger.  Also, it occurs to me that the `BitVector32` might be a more semantic choice as the core data structure (even though it's ostensibly 3x bigger) just because it has a slightly higher-level API for dealing with the bits rather than having to create my own [segment masks](./adventofcode2021-dec08/SevenSegmentDisplay.cs#L184-L190).
 
 
 
