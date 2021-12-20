@@ -50,4 +50,4 @@ I am adding this commentary section because everyone loves my opinions.
 
 ### Day 9:
   * The first part of this one wasn't so bad - had to parse the data into arrays and then compare adjacent heights.  I was a bit disappointed to learn that minimal console projects couldn't handle using `Span<T>` in methods without having to define a class, so I needed to make a `Helpers` class.
-
+  * I also learned that there is no literal marker for short (like `m` for decimal or `f` for float) so you have to do `short` versus `var`.
