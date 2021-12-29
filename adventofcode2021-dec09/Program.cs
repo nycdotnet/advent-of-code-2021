@@ -16,7 +16,7 @@ Debug.Assert(answer2 == 786780);
 
 
 short[][] GetDepthMap(string file) => GetLines(file)
-        .Select(line => Helpers.ParseCharsToShorts(line).ToArray())
+        .Select(line => line.ParseCharsToShorts().ToArray())
         .ToArray();
 
 int FindSumOfLowPointRiskLevels(string file, short[][] heightMap)
@@ -179,17 +179,3 @@ static bool IsLowerThanUp(short[][] heightMap, int x, int y) =>
     y == 0 || heightMap[y][x] < heightMap[y - 1][x];
 static bool IsLowerThanDown(short[][] heightMap, int x, int y) =>
     y == heightMap.Length - 1 || heightMap[y][x] < heightMap[y + 1][x];
-
-public static class Helpers
-{
-    public static short[] ParseCharsToShorts(string str)
-    {
-        var ss = str.AsSpan();
-        var result = new short[str.Length];
-        for (var i = 0; i < ss.Length; i++)
-        {
-            result[i] = short.Parse(ss.Slice(i,1));
-        }
-        return result;
-    }
-}

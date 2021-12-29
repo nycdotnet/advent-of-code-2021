@@ -13,5 +13,16 @@
             .Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
 
         public static string ProjectFolder() => Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\"));
+
+        public static short[] ParseCharsToShorts(this string str)
+        {
+            var ss = str.AsSpan();
+            var result = new short[str.Length];
+            for (var i = 0; i < ss.Length; i++)
+            {
+                result[i] = short.Parse(ss.Slice(i, 1));
+            }
+            return result;
+        }
     }
 }
