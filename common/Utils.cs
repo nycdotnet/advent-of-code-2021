@@ -10,7 +10,7 @@
 
         public static string[] GetLines(string fileName) =>
             File.ReadAllText(Path.Combine(ProjectFolder(), fileName))
-            .Split("\r\n");
+            .Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
 
         public static string ProjectFolder() => Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\"));
     }

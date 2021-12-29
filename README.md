@@ -51,3 +51,7 @@ I am adding this commentary section because everyone loves my opinions.
 ### Day 9:
   * The first part of this one wasn't so bad - had to parse the data into arrays and then compare adjacent heights.  I was a bit disappointed to learn that minimal console projects couldn't handle using `Span<T>` in methods without having to define a class, so I needed to make a `Helpers` class.
   * I also learned that there is no literal marker for short (like `m` for decimal or `f` for float) so you have to do `short` versus `var`.
+
+### Day 10:
+  * Some parsing of opening and closing brackets.  I used a stack and it worked quite well.  Only challenge was that the autocomplete scores were bigger than `Int32` can hold, so I got the wrong answer at first on part 2 (the sorting was incorrect due to negative numbers).  I thought it was nice to be able to find the middle item in an odd-numbered list by doing integer division by 2 on the count, skipping that many and then taking the next one.
+  * The ansi art is taking shape and I believe I see the little "cave" we're supposed to be in and the canyon where I'm assuming Santa's keys are.  This is the first one I'm doing after Christmas - December 28 (Part 2 rank 60392).  Work is crazy with Year End/Year Start.
