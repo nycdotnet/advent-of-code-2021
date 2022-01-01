@@ -64,3 +64,9 @@ I am adding this commentary section because everyone loves my opinions.
 ### Day 12:
   * This one was a bit indimidating, but thankfully the inputs prevented infinite loops and were not so big as to prevent a solution using recursion.  My solution involved allocating a bunch of `List<string>`.  Again I think maybe use a rented array, but they'd be passed into the function, so maybe it'd be hard to remember to return them?  I guess they'd be returned in the same level in the stack so this wouldn't be too bad.  It would just require an index into the last element to be passed along to the next function.  The program ran in about 33 MB RAM, so not too bad anyway.
   * I had a bug when adding the `BonusSmallCave` property to `Journey` - I wasn't always copying the existing one if it was there.  This required me to do a double-ternary to not overwrite it.  I probably could have built more logic into the record to handle this - I wonder if custom copying (aka `this with`) could be a useful pattern to help at least a bit with encapsulation?
+
+### Day 13:
+  * I got part 1 wrong because the sample input only requested to fold on Y and my real input had the first fold on X.  Shame on me for not throwing a `NotImplementedException()` even through I knew that this was coming - I had just left that branch empty.
+  * I really liked part 2 of this question because it was so short, but added a lot.  "Now render it and read the text of the result" :-)
+  * Gosh I love records - being able to `Distinct()` on `Points` was great.
+  * This was another opportunity to use `Aggregate()` - I should really use this more in real code.
