@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using static common.Utils;
 
-Console.WriteLine("Day 11: Passage Pathing");
+Console.WriteLine("Day 12: Passage Pathing");
 
 //var inputTextFileName = "example-input1.txt";
 //var inputTextFileName = "example-input2.txt";
