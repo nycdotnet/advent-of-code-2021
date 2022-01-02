@@ -70,3 +70,8 @@ I am adding this commentary section because everyone loves my opinions.
   * I really liked part 2 of this question because it was so short, but added a lot.  "Now render it and read the text of the result" :-)
   * Gosh I love records - being able to `Distinct()` on `Points` was great.
   * This was another opportunity to use `Aggregate()` - I should really use this more in real code.
+
+### Day 14:
+  * Was one of the puzzles where the first part uses an easy/obvious solution and then the second part says "run a few more iterations" and your solution goes to hell.  Instead of building one long char array to store the polymer, since the important part was the pairs and what would go between them and we just needed the count of the elements at the end, I was able to use a Dictionary to store the long counts.  This allowed summing the elements at the end - the only trick was remembering to include the "last" element from the original polymer.  Really neat puzzle.
+  * I left the original `Polymer` class in place, even though I'm just using the Parse method of it.
+

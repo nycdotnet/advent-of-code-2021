@@ -115,6 +115,7 @@ namespace common.BitArrayExtensionMethods
         /// </summary>
         /// <seealso cref="https://docs.microsoft.com/en-us/dotnet/csharp/how-to/modify-string-contents#programmatically-build-up-string-content"/>
         public static string Format(this BitArray ba, char falseCharacter = '0', char trueCharacter = '1') =>
+            // NOTE: I think the below may be wrong because it creates a closure.  I think you're supposed to use the incoming char[].
             string.Create(ba.Length, new char[ba.Length], (Span<char> result, char[] _) => {
                 for (int i = 0; i < ba.Length; i++)
                 {
