@@ -62,7 +62,7 @@ I am adding this commentary section because everyone loves my opinions.
   * I pulled the `Helpers` class out of the Day 9 project and into the existing Utils.cs file as it was useful to parse the input into a `short[][]`.  It would be interesting to see how much (if at all) using a `short[][]` differs in performance versus a `short[,]`.
 
 ### Day 12:
-  * This one was a bit indimidating, but thankfully the inputs prevented infinite loops and were not so big as to prevent a solution using recursion.  My solution involved allocating a bunch of `List<string>`.  Again I think maybe use a rented array, but they'd be passed into the function, so maybe it'd be hard to remember to return them?  I guess they'd be returned in the same level in the stack so this wouldn't be too bad.  It would just require an index into the last element to be passed along to the next function.  The program ran in about 33 MB RAM, so not too bad anyway.
+  * This one was a bit indimidating (a pathing optimization algorithm), but thankfully the inputs prevented infinite loops and were not so big as to prevent a solution using recursion.  My solution involved allocating a bunch of `List<string>`.  Again I think maybe use a rented array, but they'd be passed into the function, so maybe it'd be hard to remember to return them?  I guess they'd be returned in the same level in the stack so this wouldn't be too bad.  It would just require an index into the last element to be passed along to the next function.  The program ran in about 33 MB RAM, so not too bad anyway.
   * I had a bug when adding the `BonusSmallCave` property to `Journey` - I wasn't always copying the existing one if it was there.  This required me to do a double-ternary to not overwrite it.  I probably could have built more logic into the record to handle this - I wonder if custom copying (aka `this with`) could be a useful pattern to help at least a bit with encapsulation?
 
 ### Day 13:
@@ -76,5 +76,6 @@ I am adding this commentary section because everyone loves my opinions.
   * I left the original `Polymer` class in place, even though I'm just using the Parse method of it.
   * Was funny to get this challenge on a day when the Exchange team had their date data for 2022 not be parseable breaking mail routing on all on premises Exchange services with malware scanning enabled (aka shoulda used a `long`!).
 
-
+### Day 15:
+  * Initial thoughts: I know how to do this slow, but I don't know how to do this fast.  Going to try to make a few naive paths to find the minimum and then hope that's enough to let a brute force approach work.  :-/  I intend to look up the well known ways to do this once complete, assuming my approach works at all.
 
