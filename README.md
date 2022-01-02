@@ -74,4 +74,7 @@ I am adding this commentary section because everyone loves my opinions.
 ### Day 14:
   * Was one of the puzzles where the first part uses an easy/obvious solution and then the second part says "run a few more iterations" and your solution goes to hell.  Instead of building one long char array to store the polymer, since the important part was the pairs and what would go between them and we just needed the count of the elements at the end, I was able to use a Dictionary to store the long counts.  This allowed summing the elements at the end - the only trick was remembering to include the "last" element from the original polymer.  Really neat puzzle.
   * I left the original `Polymer` class in place, even though I'm just using the Parse method of it.
+  * Was funny to get this challenge on a day when the Exchange team had their date data for 2022 not be parseable breaking mail routing on all on premises Exchange services with malware scanning enabled (aka shoulda used a `long`!).
+
+
 
