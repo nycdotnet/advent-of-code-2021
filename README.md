@@ -78,4 +78,5 @@ I am adding this commentary section because everyone loves my opinions.
 
 ### Day 15:
   * Initial thoughts: I know how to do this slow, but I don't know how to do this fast.  Going to try to make a few naive paths to find the minimum and then hope that's enough to let a brute force approach work.  :-/  I intend to look up the well known ways to do this once complete, assuming my approach works at all.
-
+  * I made a test grid to see if up and left worked, and got an unexpected answer - it turns out the solver did the right thing and stepped over my wall of 9s because it was cheaper than navigating the maze of 1s.  Adding another row of 9s in the middle fixed this.
+  * Well I did my best and the real data murdered my bespoke algorithm as expected.  I looked up the right algorithm to use and it's called `A*` which I had not heard of until today which Wikipedia says is an extension of Dijkstra's algorithm which I had heard of before but have never used and didn't know anything about.  Fun to learn something brand new.  I am pleased to know I discovered "Manhattan distance" which I called Orthogonal distance.  I found this web page to be an outstanding tutorial: https://www.redblobgames.com/pathfinding/a-star/introduction.html

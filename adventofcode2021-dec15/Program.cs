@@ -1,159 +1,81 @@
-﻿using common;
-using System.Diagnostics;
+﻿//using adventofcode2021_dec15;
+using AStar;
+using common;
 using static common.Utils;
 
 Console.WriteLine("Day 15: Chiton");
 
-var inputTextFileName = "example-input1.txt";
-//var inputTextFileName = "myPuzzleInput.txt";
+// todo: in real world, assert that map is not jagged.
+var exampleMap1 = GetMap("example-input1.txt");
+var myMap1 = GetMap("myPuzzleInput.txt");
 
-var map = GetMap(inputTextFileName);
-
-var answer1 = DoPart1(map);
-Debug.Assert(answer1 == 3406);
-
-int DoPart1(short[][] map)
+{ 
+    Console.WriteLine($"Starting example input at {DateTime.Now}:");
+    var aStarExample = new Dec15Grid(exampleMap1, (0, 0), (9, 9));
+    Console.WriteLine($"Map is {exampleMap1.Length} tall by {exampleMap1.FirstOrDefault()?.Length ?? 0} wide");
+    Console.WriteLine($"Example input minimum risk: {aStarExample.OptimalPathCost} from {aStarExample.Start} to {aStarExample.Goal}");
+}
+{ 
+    Console.WriteLine($"Starting my input 1 at {DateTime.Now}:");
+    var aStarMap1 = new Dec15Grid(myMap1, (0, 0), (99, 99));
+    Console.WriteLine($"Map is {myMap1.Length} tall by {myMap1.FirstOrDefault()?.Length ?? 0} wide");
+    Console.WriteLine($"My input minimum risk: {aStarMap1.OptimalPathCost} from {aStarMap1.Start} to {aStarMap1.Goal}");
+}
 {
-    // theory: don't ever re-enter a previous spot.
+    Console.WriteLine($"Starting example input 2 at {DateTime.Now}:");
 
-    var initialPosition = new Point2d { X = 0, Y = 0 };
+    var exampleMap2 = ExpandMap(exampleMap1, 5);
+    var aStarExampleMap2 = new Dec15Grid(exampleMap2, (0, 0), (49, 49));
 
-    var acrossDownJourney = new Journey(initialPosition);
-    while (acrossDownJourney.CanMoveRight(map))
-    {
-        acrossDownJourney.MoveRight(map);
-    }
-    while (acrossDownJourney.CanMoveDown(map))
-    {
-        acrossDownJourney.MoveDown(map);
-    }
-    Debug.Assert(acrossDownJourney.IsComplete(map));
+    Console.WriteLine($"Map is {exampleMap2.Length} tall by {exampleMap2.FirstOrDefault()?.Length ?? 0} wide");
+    Console.WriteLine($"Example input minimum risk: {aStarExampleMap2.OptimalPathCost} from {aStarExampleMap2.Start} to {aStarExampleMap2.Goal}");
+}
+{
+    Console.WriteLine($"Starting my input 2 at {DateTime.Now}:");
 
-    var downAcrossJourney = new Journey(initialPosition);
-    while (downAcrossJourney.CanMoveDown(map))
-    {
-        downAcrossJourney.MoveDown(map);
-    }
-    while (downAcrossJourney.CanMoveRight(map))
-    {
-        downAcrossJourney.MoveRight(map);
-    }
-    Debug.Assert(downAcrossJourney.IsComplete(map));
+    var myMap2 = ExpandMap(myMap1, 5);
+    var aStarMyMap2 = new Dec15Grid(myMap2, (0, 0), ((myMap2.FirstOrDefault()?.Length ?? 0) - 1, myMap2.Length - 1));
 
-    var initialBestRisk = Math.Min(acrossDownJourney.AccumulatedRisk, downAcrossJourney.AccumulatedRisk);
-
-
-    var minimumRisk = Explore(map, new Journey(), initialBestRisk);
-
-
-
-
-    return 0;
+    Console.WriteLine($"Map is {myMap2.Length} tall by {myMap2.FirstOrDefault()?.Length ?? 0} wide");
+    Console.WriteLine($"My input (expanded) minimum risk: {aStarMyMap2.OptimalPathCost} from {aStarMyMap2.Start} to {aStarMyMap2.Goal}");
 }
 
-Journey Explore(short[][] map, Journey journey, int initialBestRisk)
+
+
+
+// Copies the map as "tiles" and applies a risk adjustment.
+static short[][] ExpandMap(short[][] inputMap, int expansionRatio)
 {
-    var newBestRisk = initialBestRisk;
-    var bestJourney = journey;
-    if (journey.CanMoveRight(map) && !journey.HasVisitedRight)
+    var result = new short[inputMap.Length * expansionRatio][];
+
+    for (var y = 0; y < inputMap.Length; y++)
     {
-        //var rightJourney = bestJourney with { };
-        //rightJourney.MoveRight(map);
-        //var rightJourney = Explore(map, journey, newBestRisk);
-        //if (rightJourney.AccumulatedRisk < newBestRisk)
-        //{
-        //    newBestRisk = rightJourney.AccumulatedRisk;
-        //    bestJourney = rightJourney;
-        //}
+        for (var yTileIndex = 0; yTileIndex < expansionRatio; yTileIndex++)
+        {
+            var yOffset = y + (yTileIndex * inputMap.Length);
+            result[yOffset] = new short[inputMap[y].Length * expansionRatio];
+
+            for (var x = 0; x < inputMap[y].Length; x++)
+            {
+                for (var xTileIndex = 0; xTileIndex < expansionRatio; xTileIndex++)
+                {
+                    var xOffset = x + (xTileIndex * inputMap[y].Length);
+
+                    short risk = (short)(inputMap[y][x] + yTileIndex + xTileIndex);
+                    while (risk > 9)
+                    {
+                        risk -= 9;
+                    }
+
+                    result[yOffset][xOffset] = risk;
+                }
+            }
+        }
     }
-
-    if (journey.CanMoveDown(map) && !journey.HasVisitedDown)
-    {
-        //var downJourney = Explore(map, journey, newBestRisk);
-        //if (downJourney.AccumulatedRisk < newBestRisk)
-        //{
-        //    newBestRisk = downJourney.AccumulatedRisk;
-        //    bestJourney = downJourney;
-        //}
-    }
-
-
-    return bestJourney;
+    return result;
 }
 
 short[][] GetMap(string file) => GetLines(file)
     .Select(line => line.ParseCharsToShorts().ToArray())
     .ToArray();
 
-public record Journey
-{
-    public HashSet<Point2d> Path { get; set; }
-    public Point2d CurrentPosition { get; set; }
-    public int AccumulatedRisk { get; private set; }
-
-    public Journey() {
-        Path = new();
-    }
-    public Journey(Point2d initial)
-    {
-        Path = new() { initial };
-        CurrentPosition = initial;
-    }
-
-    public bool IsComplete(short[][] map) => CurrentPosition.Y == map.Length - 1 && CurrentPosition.X == map[0].Length - 1;
-
-
-    public bool CanMoveRight(short[][] map) => CurrentPosition.X + 1 < map[CurrentPosition.Y].Length;
-    public bool CanMoveLeft(short[][] _) => CurrentPosition.X > 0;
-    public bool CanMoveDown(short[][] map) => CurrentPosition.Y + 1 < map.Length;
-    public bool CanMoveUp(short[][] _) => CurrentPosition.Y > 0;
-
-    public bool HasVisitedRight => Path.Contains(CurrentPosition with { X = CurrentPosition.X + 1 });
-    public bool HasVisitedLeft => Path.Contains(CurrentPosition with { X = CurrentPosition.X - 1 });
-    public bool HasVisitedDown => Path.Contains(CurrentPosition with { X = CurrentPosition.Y + 1 });
-    public bool HasVisitedUp => Path.Contains(CurrentPosition with { X = CurrentPosition.Y - 1 });
-
-    /// <summary>
-    /// Moves right and returns the new risk level.  Throws if not possible.
-    /// </summary>
-    public short MoveRight(short[][] map)
-    {
-        CurrentPosition = CurrentPosition with { X = CurrentPosition.X + 1 };
-        var newRisk = map[CurrentPosition.Y][CurrentPosition.X];
-        AccumulatedRisk += newRisk;
-        return newRisk;
-    }
-
-    /// <summary>
-    /// Moves left and returns the new risk level.  Throws if not possible.
-    /// </summary>
-    public short MoveLeft(short[][] map)
-    {
-        CurrentPosition = CurrentPosition with { X = CurrentPosition.X - 1 };
-        var newRisk = map[CurrentPosition.Y][CurrentPosition.X];
-        AccumulatedRisk += newRisk;
-        return newRisk;
-    }
-
-    /// <summary>
-    /// Moves down and returns the new risk level.  Throws if not possible.
-    /// </summary>
-    public short MoveDown(short[][] map)
-    {
-        CurrentPosition = CurrentPosition with { Y = CurrentPosition.Y + 1 };
-        var newRisk = map[CurrentPosition.Y][CurrentPosition.X];
-        AccumulatedRisk += newRisk;
-        return newRisk;
-    }
-
-    /// <summary>
-    /// Moves up and returns the new risk level.  Throws if not possible.
-    /// </summary>
-    public short MoveUp(short[][] map)
-    {
-        CurrentPosition = CurrentPosition with { Y = CurrentPosition.Y - 1 };
-        var newRisk = map[CurrentPosition.Y][CurrentPosition.X];
-        AccumulatedRisk += newRisk;
-        return newRisk;
-    }
-}

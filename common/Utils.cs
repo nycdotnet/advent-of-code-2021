@@ -8,6 +8,9 @@
             .AsOrdered() // PLINQ is not guaranteed to be ordered unlike linq to objects
             .Select(x => int.Parse(x));
 
+        /// <summary>
+        /// Gets the lines from the specified file relative to the project folder
+        /// </summary>
         public static string[] GetLines(string fileName) =>
             File.ReadAllText(Path.Combine(ProjectFolder(), fileName))
             .Split("\r\n", StringSplitOptions.RemoveEmptyEntries);

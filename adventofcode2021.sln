@@ -38,9 +38,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "adventofcode2021-dec12", "a
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "adventofcode2021-dec13", "adventofcode2021-dec13\adventofcode2021-dec13.csproj", "{86C62A42-3AB9-411B-A241-53EEAEEA8587}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "adventofcode2021-dec14", "adventofcode2021-dec14\adventofcode2021-dec14.csproj", "{A1FA7727-5545-4BD8-81A6-DC38855E45D5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "adventofcode2021-dec14", "adventofcode2021-dec14\adventofcode2021-dec14.csproj", "{A1FA7727-5545-4BD8-81A6-DC38855E45D5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "adventofcode2021-dec15", "adventofcode2021-dec15\adventofcode2021-dec15.csproj", "{73B8F334-ECB3-4C03-BEBF-D3F760401D45}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "adventofcode2021-dec15", "adventofcode2021-dec15\adventofcode2021-dec15.csproj", "{73B8F334-ECB3-4C03-BEBF-D3F760401D45}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

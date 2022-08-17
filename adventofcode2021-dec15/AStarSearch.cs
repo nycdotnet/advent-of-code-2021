@@ -5,7 +5,7 @@ namespace AStar
     /// <summary>
     /// Implements AStar where the cost is measured as a <see cref="short"/>.
     /// </summary>
-    public class AStarSearch2<TLocationIdentifier> where TLocationIdentifier : notnull
+    public class AStarShort<TLocationIdentifier> where TLocationIdentifier : notnull
     {
         // for the given key location identifier, returns the identifier of the previous location
         // along the least expensive path.
@@ -14,7 +14,7 @@ namespace AStar
         // the least expensive known cost to get to the given key location
         public readonly Dictionary<TLocationIdentifier, short> bestKnownCostTo = new();
 
-        public AStarSearch2(IWeightedGraph<TLocationIdentifier> graph,
+        public AStarShort(IWeightedGraph<TLocationIdentifier> graph,
             TLocationIdentifier start,
             TLocationIdentifier goal,
             Func<TLocationIdentifier, TLocationIdentifier, short> heuristic)
@@ -93,10 +93,12 @@ namespace AStar
     public class Dec15Grid : IWeightedGraph<(int x, int y)>
     {
         private short[][] costs;
-        public Dec15Grid(string inputFileName, (int x, int y) start, (int x, int y) destination)
+        public Dec15Grid(short[][] costs, (int x, int y) start, (int x, int y) goal)
         {
-            costs = GetMap(inputFileName);
-            var astar = new AStarSearch2<(int x, int y)>(this, start, destination, Cost);
+            this.costs = costs;
+            Start = start;
+            Goal = goal;
+            var astar = new AStarShort<(int x, int y)>(this, start, goal, Cost);
             OptimalPath = astar.GetOptimalPath().ToList();
             OptimalPath.Reverse();
             OptimalPathCost = astar.GetOptimalPathCost();
@@ -105,6 +107,8 @@ namespace AStar
 
         public List<(int x, int y)> OptimalPath { get; private set; }
         public short OptimalPathCost { get; }
+        public (int x, int y) Start { get; private set; }
+        public (int x, int y) Goal { get; private set; }
 
         public short Cost((int x, int y) from, (int x, int y) to) => costs[to.y][to.x];
 
@@ -140,10 +144,6 @@ namespace AStar
                 yield return test;
             }
         }
-
-        short[][] GetMap(string file) => GetLines(file)
-            .Select(line => line.ParseCharsToShorts().ToArray())
-            .ToArray();
     }
 
     public interface IWeightedGraph<TLocationIdentifier>
