@@ -1,5 +1,4 @@
-﻿using System.Xml.Linq;
-using static common.Utils;
+﻿using static common.Utils;
 
 namespace AStar
 {
@@ -35,7 +34,7 @@ namespace AStar
             {
                 if (current.Equals(goal))
                 {
-                    Success = true;
+                    PathFound = true;
                     break;
                 }
                 var costToGetHere = bestKnownCostTo[current];
@@ -56,7 +55,7 @@ namespace AStar
 
         public TLocationIdentifier Start { get; }
         public TLocationIdentifier Goal { get; }
-        public bool Success { get; private set; }
+        public bool PathFound { get; private set; }
 
         /// <summary>
         /// returns the optimal path, navigating backward from the goal to the start.
@@ -84,7 +83,7 @@ namespace AStar
 
         private void ThrowIfNotSuccess()
         {
-            if (!Success)
+            if (!PathFound)
             {
                 throw new Exception("No path found.");
             }
