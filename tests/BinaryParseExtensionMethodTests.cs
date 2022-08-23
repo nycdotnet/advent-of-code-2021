@@ -25,6 +25,17 @@ namespace tests
         }
 
         [Theory]
+        [InlineData("D2FE28", "110100101111111000101000")]
+        [InlineData("38006F45291200", "00111000000000000110111101000101001010010001001000000000")]
+        public void CanRoundTrip_TryParseBigEndianHexToBitArray(string input, string expected)
+        {
+            var isParseable = input.TryParseBigEndianHexToBitArray(out var ba);
+            isParseable.Should().BeTrue();
+            ba.Should().NotBeNull();
+            ba.Format().Should().Be(expected);
+        }
+
+        [Theory]
         [InlineData("00100", "~~*~~")]
         [InlineData("100010011000", "*~~~*~~**~~~")]
         public void CanRoundTripBinaryParseAndFormatUsingSimplerMethods(string input, string expected)

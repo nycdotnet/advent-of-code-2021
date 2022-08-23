@@ -39,6 +39,34 @@ namespace common.BitArrayExtensionMethods
             return true;
         }
 
+        public static bool TryParseBigEndianHexToBitArray(this string s, out BitArray? result) =>
+            s.AsSpan().TryParseBigEndianHexToBitArray(out result);
+
+        public static bool TryParseBigEndianHexToBitArray(this ReadOnlySpan<char> s, out BitArray? result)
+        {
+            try
+            {
+                var bytes = new byte[s.Length / 2];
+
+                var writeIndex = 0;
+                for (var charIndex = 0; charIndex < s.Length; charIndex += 2)
+                {
+                    var a = Utils.CharToNibbleBE(s[charIndex]);
+                    var b = Utils.CharToNibbleBE(s[charIndex + 1]);
+                    bytes[writeIndex] = (byte)((b << 4) + a);
+                    writeIndex++;
+                }
+
+                result = new BitArray(bytes);
+            }
+            catch (Exception)
+            {
+                result = null;
+                return false;
+            }
+            return true;
+        }
+
         /// <summary>
         /// Converts <paramref name="i"/> to a <see cref="BitArray"/> of
         /// length <paramref name="length"/>.  If length is not specified,
@@ -167,7 +195,7 @@ namespace common.BitArrayExtensionMethods
             var bit = 1u;
             for (var i = ba.Length - 1; i >= 0; i--)
             {
-                if (ba[i])
+                if (ba.Get(i))
                 {
                     result |= bit;
                 }
