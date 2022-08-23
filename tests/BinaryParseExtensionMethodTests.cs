@@ -67,13 +67,28 @@ namespace tests
         [InlineData("01111111111111111111111111111111", 2147483647u)]
         [InlineData("1111111111111111111111111111111", 2147483647u)]
         [InlineData("", 0)]
-        public void CanConvertToUInt32(string input, uint expected)
+        public void CanGetBigEndianUInt32(string input, uint expected)
         {
             var isParseable = input.TryParseToBitArray(out var ba);
             isParseable.Should().BeTrue();
             ba.Should().NotBeNull();
             ba!.Length.Should().Be(input.Length);
-            ba.ToUInt32().Should().Be(expected);
+            ba.GetBigEndianUInt32().Should().Be(expected);
+        }
+
+        [Theory]
+        [InlineData("10101", 4, 1, 1u)]
+        [InlineData("10101", 3, 1, 0u)]
+        [InlineData("10101", 0, 3, 5u)]
+        [InlineData("10101", 0, 5, 21u)]
+        [InlineData("", 0, 0, 0u)]
+        public void CanGetBigEndianUInt32WithSlicing(string input, int startIndex, int length, uint expected)
+        {
+            var isParseable = input.TryParseToBitArray(out var ba);
+            isParseable.Should().BeTrue();
+            ba.Should().NotBeNull();
+            ba!.Length.Should().Be(input.Length);
+            ba.GetBigEndianUInt32(startIndex, length).Should().Be(expected);
         }
 
         [Theory]

@@ -185,15 +185,32 @@ namespace common.BitArrayExtensionMethods
         /// <remarks>
         /// Adapted from Marc Gravel's answer at https://stackoverflow.com/questions/713057/convert-bool-to-byte
         /// </remarks>
-        public static uint ToUInt32(this BitArray ba)
+        public static uint GetBigEndianUInt32(this BitArray ba)
         {
             if (ba.Length > 32)
             {
-                throw new ArgumentException(message: $"The {nameof(ToUInt32)} extension method does not support {nameof(BitArray)} parameters with more than 32 bits.", paramName: nameof(ba));
+                throw new ArgumentException(message: $"The {nameof(GetBigEndianUInt32)} extension method does not support {nameof(BitArray)} parameters with more than 32 bits.", paramName: nameof(ba));
+            }
+            return GetBigEndianUInt32(ba, 0, ba.Length);
+        }
+
+        /// <summary>
+        /// Converts the bits in <paramref name="ba"/> to a <see cref="uint"/> in a manner where the last bit
+        /// in the <paramref name="ba"/> is the least significant.  If there are more than 32 bits in
+        /// <paramref name="ba"/>, will throw.  (NOTE: This is opposite the way that numbers typically work in .NET)
+        /// </summary>
+        /// <remarks>
+        /// Adapted from Marc Gravel's answer at https://stackoverflow.com/questions/713057/convert-bool-to-byte
+        /// </remarks>
+        public static uint GetBigEndianUInt32(this BitArray ba, int startIndex, int length)
+        {
+            if (length > 32)
+            {
+                throw new ArgumentException(message: $"The {nameof(GetBigEndianUInt32)} extension method does not support getting a length of more than 32 bits.", paramName: nameof(ba));
             }
             var result = 0u;
             var bit = 1u;
-            for (var i = ba.Length - 1; i >= 0; i--)
+            for (var i = startIndex + length - 1; i >= startIndex; i--)
             {
                 if (ba.Get(i))
                 {

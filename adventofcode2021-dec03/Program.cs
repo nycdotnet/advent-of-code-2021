@@ -28,8 +28,8 @@ uint PrintDay3PartOneAnswer(string inputTextFileName)
        })
        .ToList();
 
-    var gamma = GetGammaBits(bits).ToUInt32();
-    var epsilon = GetEpsilonBits(bits).ToUInt32();
+    var gamma = GetGammaBits(bits).GetBigEndianUInt32();
+    var epsilon = GetEpsilonBits(bits).GetBigEndianUInt32();
     var product = gamma * epsilon;
     Console.WriteLine($"The Gamma Rate is {gamma} and Epsilon Rate is {epsilon}.  The product is {product}.");
 
@@ -52,8 +52,8 @@ uint PrintDay3PartTwoAnswer(string inputTextFileName)
        })
        .ToArray();
 
-    var oxygenGeneratorRating = GetOxygenRating(bits).ToUInt32();
-    var co2ScrubberRating = GetCO2ScrubberRating(bits).ToUInt32();
+    var oxygenGeneratorRating = GetOxygenRating(bits).GetBigEndianUInt32();
+    var co2ScrubberRating = GetCO2ScrubberRating(bits).GetBigEndianUInt32();
 
     var lifeSupportRating = oxygenGeneratorRating * co2ScrubberRating;
 
