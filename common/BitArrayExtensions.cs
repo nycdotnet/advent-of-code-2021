@@ -42,7 +42,7 @@ namespace common.BitArrayExtensionMethods
         /// <summary>
         /// Converts <paramref name="i"/> to a <see cref="BitArray"/> of
         /// length <paramref name="length"/>.  If length is not specified,
-        /// the length of the result will be 32.
+        /// the length of the result will be 32.  Warning: This does not round trip...
         /// </summary>
         public static BitArray ToBitArray(this int i, int length = 0)
         {
@@ -105,6 +105,32 @@ namespace common.BitArrayExtensionMethods
             }
         }
 
+
+        /// <summary>
+        /// Reads a byte out of a BitArray.  OK to specify a length less than 8 - will just pad zeros on the byte.
+        /// </summary>
+        public static byte GetByte(this BitArray ba, int startIndex, int length)
+        {
+            const int bitSize = sizeof(byte) * 8;
+            if (length > bitSize)
+            {
+                throw new ArgumentOutOfRangeException($"Can't read more than {bitSize} bits into a byte.");
+            }
+            byte result = 0;
+            var writeIndex = length - 1;
+            for (var readIndex = startIndex; readIndex < length + startIndex; readIndex++)
+            {
+                if (ba.Get(readIndex))
+                {
+                    // this sets the bit at the writeIndex
+                    result |= (byte)(1 << writeIndex);
+                }
+                writeIndex--;
+            }
+            return result;
+        }
+
+
         /// <summary>
         /// Formats the contents of a bit array as a string of characters
         /// in index order, i.e. the index 0 of the BitArray will be the first
@@ -126,7 +152,7 @@ namespace common.BitArrayExtensionMethods
         /// <summary>
         /// Converts the bits in <paramref name="ba"/> to a <see cref="uint"/> in a manner where the last bit
         /// in the <paramref name="ba"/> is the least significant.  If there are more than 32 bits in
-        /// <paramref name="ba"/>, will throw.
+        /// <paramref name="ba"/>, will throw.  (NOTE: This is opposite the way that numbers typically work in .NET)
         /// </summary>
         /// <remarks>
         /// Adapted from Marc Gravel's answer at https://stackoverflow.com/questions/713057/convert-bool-to-byte

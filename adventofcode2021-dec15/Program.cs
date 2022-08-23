@@ -1,5 +1,4 @@
-﻿//using adventofcode2021_dec15;
-using AStar;
+﻿using AStar;
 using common;
 using static common.Utils;
 
@@ -39,8 +38,6 @@ var myMap1 = GetMap("myPuzzleInput.txt");
     Console.WriteLine($"Map is {myMap2.Length} tall by {myMap2.FirstOrDefault()?.Length ?? 0} wide");
     Console.WriteLine($"My input (expanded) minimum risk: {aStarMyMap2.OptimalPathCost} from {aStarMyMap2.Start} to {aStarMyMap2.Goal}");
 }
-
-
 
 
 // Copies the map as "tiles" and applies a risk adjustment.
