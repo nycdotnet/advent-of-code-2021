@@ -92,12 +92,13 @@ public struct Packet
 {
     public static Packet Parse(ReadOnlySpan<char> s)
     {
+        //todo: throw if this is not possible.
         _ = s.TryParseBigEndianHexToBitArray(out var ba);
-        var result = Parse(ba, 0);
+        var result = ParseStartingAt(ba, 0);
         return result.packet;
     }
 
-    public static (Packet packet, int bitsRead) Parse(BitArray ba, int startIndex)
+    public static (Packet packet, int bitsRead) ParseStartingAt(BitArray ba, int startIndex)
     {
         var result = new Packet();
         
@@ -134,7 +135,7 @@ public struct Packet
                 var subPacketBitsRead = 0;
                 while (subPacketBitsRead < subPacketBitLength)
                 {
-                    var subPacketParseResult = Parse(subPacketBits, subPacketBitsRead);
+                    var subPacketParseResult = ParseStartingAt(subPacketBits, subPacketBitsRead);
                     result.SubPackets.Add(subPacketParseResult.packet);
                     subPacketBitsRead += subPacketParseResult.bitsRead;
                 }
@@ -148,7 +149,7 @@ public struct Packet
                 while (result.SubPackets.Count < result.DeclaredCountOfSubPackets)
                 {
                     var potentialSubPacketBits = ba.Slice(bitsRead);
-                    var subPacketParseResult = Parse(potentialSubPacketBits, 0);
+                    var subPacketParseResult = ParseStartingAt(potentialSubPacketBits, 0);
                     bitsRead += subPacketParseResult.bitsRead;
                     result.SubPackets.Add(subPacketParseResult.packet);
                 }
@@ -174,6 +175,8 @@ public struct Packet
             }
         }
     }
+
+
 
     public Packet()
     {
