@@ -194,6 +194,15 @@ namespace common.BitArrayExtensionMethods
             return GetBigEndianUInt32(ba, 0, ba.Length);
         }
 
+        public static ulong GetBigEndianULong(this BitArray ba)
+        {
+            if (ba.Length > 64)
+            {
+                throw new ArgumentException(message: $"The {nameof(GetBigEndianULong)} extension method does not support {nameof(BitArray)} parameters with more than 64 bits.", paramName: nameof(ba));
+            }
+            return GetBigEndianULong(ba, 0, ba.Length);
+        }
+
         /// <summary>
         /// Converts the bits in <paramref name="ba"/> to a <see cref="uint"/> in a manner where the last bit
         /// in the <paramref name="ba"/> is the least significant.  If there are more than 32 bits in
@@ -220,6 +229,28 @@ namespace common.BitArrayExtensionMethods
             }
             return result;
         }
+
+        public static ulong GetBigEndianULong(this BitArray ba, int startIndex, int length)
+        {
+            if (length > 64)
+            {
+                throw new ArgumentException(message: $"The {nameof(GetBigEndianULong)} extension method does not support getting a length of more than 64 bits.", paramName: nameof(ba));
+            }
+            var result = 0u;
+            var bit = 1u;
+            for (var i = startIndex + length - 1; i >= startIndex; i--)
+            {
+                if (ba.Get(i))
+                {
+                    result |= bit;
+                }
+                bit <<= 1;
+            }
+            return result;
+        }
+
+
+
         /// <summary>
         /// Returns a new <see cref="BitArray"/> with the content of <paramref name="ba"/> starting from
         /// <paramref name="startIndex"/> to the end.  Does not mutate <paramref name="ba"/>.
@@ -253,11 +284,11 @@ namespace common.BitArrayExtensionMethods
             }
             // todo: check other boundary conditions.
 
-            for (var i = 0; i < 32 - count; i++)
+            for (var i = 0; i < ba.Length - count; i++)
             {
                 ba.Set(i, ba.Get(i + count));
             }
-            for (var i = 32 - count; i < 32; i++)
+            for (var i = ba.Length - count; i < ba.Length; i++)
             {
                 ba.Set(i, false);
             }

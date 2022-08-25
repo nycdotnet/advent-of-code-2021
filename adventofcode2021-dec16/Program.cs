@@ -12,7 +12,7 @@ var p = Packet.Parse(example1);
 
 Debug.Assert(p.Version == 6);
 Debug.Assert(p.PacketType == 4);
-Debug.Assert(p.Data.GetBigEndianUInt32() == 2021);
+Debug.Assert(p.Data.GetBigEndianULong() == 2021);
 Debug.Assert(p.LengthTypeId == Packet.LengthType.NotSet);
 
 var operatorPacketExample = "38006F45291200";
@@ -22,8 +22,8 @@ Debug.Assert(op.Version == 1);
 Debug.Assert(op.PacketType == 6);
 Debug.Assert(op.LengthTypeId == Packet.LengthType.TotalLengthInBits);
 Debug.Assert(op.SubPackets.Count == 2);
-Debug.Assert(op.SubPackets[0].Data.GetBigEndianUInt32() == 10);
-Debug.Assert(op.SubPackets[1].Data.GetBigEndianUInt32() == 20);
+Debug.Assert(op.SubPackets[0].Data.GetBigEndianULong() == 10);
+Debug.Assert(op.SubPackets[1].Data.GetBigEndianULong() == 20);
 
 var operatorPacketExample2 = "EE00D40C823060";
 var op2 = Packet.Parse(operatorPacketExample2);
@@ -34,9 +34,9 @@ Debug.Assert(op2.LengthTypeId == Packet.LengthType.NumberOfSubPackets);
 Debug.Assert(op2.DeclaredCountOfSubPackets == 3);
 Debug.Assert(op2.SubPackets.Count == 3);
 
-Debug.Assert(op2.SubPackets[0].Data.GetBigEndianUInt32() == 1);
-Debug.Assert(op2.SubPackets[1].Data.GetBigEndianUInt32() == 2);
-Debug.Assert(op2.SubPackets[2].Data.GetBigEndianUInt32() == 3);
+Debug.Assert(op2.SubPackets[0].Data.GetBigEndianULong() == 1);
+Debug.Assert(op2.SubPackets[1].Data.GetBigEndianULong() == 2);
+Debug.Assert(op2.SubPackets[2].Data.GetBigEndianULong() == 3);
 
 var moreExample1Hex = "8A004A801A8002F478";
 var me1 = Packet.Parse(moreExample1Hex);
@@ -57,6 +57,39 @@ Debug.Assert(me4.SumOfVersionsWithChildren() == 31);
 
 RunPart1();
 
+var p2e1 = Packet.Parse("C200B40A82");
+Debug.Assert(p2e1.Value() == 3);
+Console.WriteLine(p2e1.AST());
+
+var p2e2 = Packet.Parse("04005AC33890");
+Debug.Assert(p2e2.Value() == 54);
+Console.WriteLine(p2e2.AST());
+
+var p2e3 = Packet.Parse("880086C3E88112");
+Debug.Assert(p2e3.Value() == 7);
+Console.WriteLine(p2e3.AST());
+
+var p2e4 = Packet.Parse("CE00C43D881120");
+Debug.Assert(p2e4.Value() == 9);
+Console.WriteLine(p2e4.AST());
+
+var p2e5 = Packet.Parse("D8005AC2A8F0");
+Debug.Assert(p2e5.Value() == 1);
+Console.WriteLine(p2e5.AST());
+
+var p2e6 = Packet.Parse("F600BC2D8F");
+Debug.Assert(p2e6.Value() == 0);
+Console.WriteLine(p2e6.AST());
+
+var p2e7 = Packet.Parse("9C005AC2F8F0");
+Debug.Assert(p2e7.Value() == 0);
+Console.WriteLine(p2e7.AST());
+
+var p2e8 = Packet.Parse("9C0141080250320F1802104A08");
+Debug.Assert(p2e8.Value() == 1);
+Console.WriteLine(p2e8.AST());
+
+RunPart2();
 
 void RunPart1()
 {
@@ -65,13 +98,30 @@ void RunPart1()
     Console.WriteLine($"Part one answer: {outerPacket.SumOfVersionsWithChildren()}");
 }
 
+void RunPart2()
+{
+    var hex = GetLines("myPuzzleInput.txt").First();
+    var outerPacket = Packet.Parse(hex);
+
+    var result = outerPacket.Value();
+
+    var firstGuess = 1190591180u; // this was too low
+    var secondGuess = 69910067916ul; // still too low!
+    //                69910067916
+
+    Debug.Assert(result > secondGuess);
+    Console.WriteLine(outerPacket.AST());
+
+    Console.WriteLine($"Part two answer: {result}");
+}
+
 
 public class BinaryNumber
 {
-    // todo: add growing.
+    // todo: add growing beyond 64.
     public BinaryNumber()
     {
-        Data = new(32);
+        Data = new(64);
         BitLength = 0;
     }
     public BitArray Data { get; private set; }
@@ -81,21 +131,25 @@ public class BinaryNumber
     // bits.
     public void PushNibble(byte nibble)
     {
+        if (BitLength >= 64)
+        {
+            throw new OverflowException("Can't store more than 64 bits.");
+        }
         if (BitLength > 0)
         {
             Data.ShiftLeft(4);
         }
-        var setIndex = 31;
+        var setIndex = 64 - 1;
         Data.Set(setIndex--, (nibble & 1) == 1);
         Data.Set(setIndex--, (nibble & 2) == 2);
         Data.Set(setIndex--, (nibble & 4) == 4);
         Data.Set(setIndex--, (nibble & 8) == 8);
         BitLength += 4;
     }
-    public uint GetBigEndianUInt32() => Data.GetBigEndianUInt32();
+    public ulong GetBigEndianULong() => Data.GetBigEndianULong();
+    public override string ToString() => $"UInt64 Value (BE): {Data.GetBigEndianULong()}, Bits: {Data.Format()}";
+    public string Formatted => ToString();
 }
-
-
 
 public struct Packet
 {
@@ -191,6 +245,94 @@ public struct Packet
     public int SumOfVersionsWithChildren() =>
         Convert.ToInt32(Version) + SubPackets.Sum(p => p.SumOfVersionsWithChildren());
 
+    public string AST()
+    {
+        switch ((PacketTypes)PacketType)
+        {
+            case PacketTypes.Sum:
+                return $"({string.Join(" + ", SubPackets.Select(p => p.AST()))})";
+            case PacketTypes.Product:
+                return $"({string.Join(" * ", SubPackets.Select(p => p.AST()))})";
+            case PacketTypes.Minimum:
+                return $"Min({string.Join(", ", SubPackets.Select(p => p.AST()))})";
+            case PacketTypes.Maximum:
+                return $"Max({string.Join(", ", SubPackets.Select(p => p.AST()))})";
+            case PacketTypes.Literal:
+                return Data.GetBigEndianULong().ToString();
+            case PacketTypes.GreaterThan:
+                if (SubPackets.Count != 2)
+                {
+                    throw new NotSupportedException($"{nameof(PacketTypes.GreaterThan)} packets must have exactly two subpackets.");
+                }
+                return $"GT({string.Join(", ", SubPackets.Select(p => p.AST()))})";
+            case PacketTypes.LessThan:
+                if (SubPackets.Count != 2)
+                {
+                    throw new NotSupportedException($"{nameof(PacketTypes.LessThan)} packets must have exactly two subpackets.");
+                }
+                return $"LT({string.Join(", ", SubPackets.Select(p => p.AST()))})";
+            case PacketTypes.EqualTo:
+                if (SubPackets.Count != 2)
+                {
+                    throw new NotSupportedException($"{nameof(PacketTypes.EqualTo)} packets must have exactly two subpackets.");
+                }
+                return $"EQ({string.Join(", ", SubPackets.Select(p => p.AST()))})";
+            default:
+                throw new NotSupportedException($"Unknown Packet Type {PacketType}");
+        }
+    }
+
+    public ulong Value()
+    {
+        switch ((PacketTypes)PacketType)
+        {
+            case PacketTypes.Sum:
+                {
+                    var result = 0ul;
+                    foreach (var p in SubPackets)
+                    {
+                        result = checked(result + p.Value());
+                    }
+                    return result;
+                }
+            case PacketTypes.Product:
+                { 
+                    var result = 1ul;
+                    foreach (var p in SubPackets)
+                    {
+                        result = checked(result * p.Value());
+                    }
+                    return result;
+                }
+            case PacketTypes.Minimum:
+                return SubPackets.Min(p => p.Value());
+            case PacketTypes.Maximum:
+                return SubPackets.Max(p => p.Value());
+            case PacketTypes.Literal:
+                return Data.GetBigEndianULong();
+            case PacketTypes.GreaterThan:
+                if (SubPackets.Count != 2)
+                {
+                    throw new NotSupportedException($"{nameof(PacketTypes.GreaterThan)} packets must have exactly two subpackets.");
+                }
+                return SubPackets[0].Value() > SubPackets[1].Value() ? 1u : 0;
+            case PacketTypes.LessThan:
+                if (SubPackets.Count != 2)
+                {
+                    throw new NotSupportedException($"{nameof(PacketTypes.LessThan)} packets must have exactly two subpackets.");
+                }
+                return SubPackets[0].Value() < SubPackets[1].Value() ? 1u : 0;
+            case PacketTypes.EqualTo:
+                if (SubPackets.Count != 2)
+                {
+                    throw new NotSupportedException($"{nameof(PacketTypes.EqualTo)} packets must have exactly two subpackets.");
+                }
+                return SubPackets[0].Value() == SubPackets[1].Value() ? 1u : 0;
+            default:
+                throw new NotSupportedException($"Unknown Packet Type {PacketType}");
+        }
+    }
+
     public Packet()
     {
         LengthTypeId = LengthType.NotSet;
@@ -207,11 +349,10 @@ public struct Packet
     private const int PACKET_TYPE_LENGTH = 3;
     private const int LENGTH_TYPE_ID_LENGTH = 1;
     private const int DATA_LENGTH = 5;
-    private const int PACKET_TYPE_LITERAL_VALUE = 4;
     private const int COUNT_OF_SUBPACKETS_BITS_SIZE = 11;
     private const int SUBPACKETS_BIT_LENGTH_BITS_SIZE = 15;
 
-    public bool IsLiteralValue => PacketType == PACKET_TYPE_LITERAL_VALUE;
+    public bool IsLiteralValue => PacketType == (byte)PacketTypes.Literal;
     public byte Version { get; private set; }
     public byte PacketType { get; private set; }
     public BinaryNumber Data { get; private set; }
@@ -223,5 +364,16 @@ public struct Packet
         TotalLengthInBits = 0,
         NumberOfSubPackets = 1,
         NotSet = -1
+    }
+    public enum PacketTypes
+    {
+        Sum = 0,
+        Product = 1,
+        Minimum = 2,
+        Maximum = 3,
+        Literal = 4,
+        GreaterThan = 5,
+        LessThan = 6,
+        EqualTo = 7
     }
 }
