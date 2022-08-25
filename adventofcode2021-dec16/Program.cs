@@ -1,13 +1,11 @@
-﻿using common;
-using common.BitArrayExtensionMethods;
+﻿using common.BitArrayExtensionMethods;
 using System.Collections;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
+using static common.Utils;
 
 // todo: read this http://graphics.stanford.edu/~seander/bithacks.html
 
 Console.WriteLine("Day 16: Packet Decoder");
-
 
 var example1 = "D2FE28";
 var p = Packet.Parse(example1);
@@ -16,7 +14,6 @@ Debug.Assert(p.Version == 6);
 Debug.Assert(p.PacketType == 4);
 Debug.Assert(p.Data.GetBigEndianUInt32() == 2021);
 Debug.Assert(p.LengthTypeId == Packet.LengthType.NotSet);
-
 
 var operatorPacketExample = "38006F45291200";
 var op = Packet.Parse(operatorPacketExample);
@@ -41,21 +38,33 @@ Debug.Assert(op2.SubPackets[0].Data.GetBigEndianUInt32() == 1);
 Debug.Assert(op2.SubPackets[1].Data.GetBigEndianUInt32() == 2);
 Debug.Assert(op2.SubPackets[2].Data.GetBigEndianUInt32() == 3);
 
+var moreExample1Hex = "8A004A801A8002F478";
+var me1 = Packet.Parse(moreExample1Hex);
+Debug.Assert(me1.SumOfVersionsWithChildren() == 16);
+
+var moreExample2Hex = "620080001611562C8802118E34";
+var me2 = Packet.Parse(moreExample2Hex);
+Debug.Assert(me2.SumOfVersionsWithChildren() == 12);
+
+var moreExample3Hex = "C0015000016115A2E0802F182340";
+var me3 = Packet.Parse(moreExample3Hex);
+Debug.Assert(me3.SumOfVersionsWithChildren() == 23);
+
+var moreExample4Hex = "A0016C880162017C3686B18A3D4780";
+var me4 = Packet.Parse(moreExample4Hex);
+Debug.Assert(me4.SumOfVersionsWithChildren() == 31);
 
 
-//var first = p.Data[0].ToString("X");
-//var second = p.Data[1].ToString("X");
+RunPart1();
 
-//var expected = 2021;
-//var expectedBA = expected.ToBitArray();
-//Console.WriteLine($"the expected BA is {expectedBA.Format()}");
-//// the expected BA is 10100111111000000000000000000000
-//var expectedRT = expectedBA.ToUInt32();
-//Debug.Assert(expectedRT == 2021);
 
-//var ba = new BitArray(p.Data);
-//Console.WriteLine($"data in packet is {ba.Format()}");
-//Debug.Assert(ba.Format() == "011111100101");
+void RunPart1()
+{
+    var hex = GetLines("myPuzzleInput.txt").First();
+    var outerPacket = Packet.Parse(hex);
+    Console.WriteLine($"Part one answer: {outerPacket.SumOfVersionsWithChildren()}");
+}
+
 
 public class BinaryNumber
 {
@@ -101,13 +110,15 @@ public struct Packet
     public static (Packet packet, int bitsRead) ParseStartingAt(BitArray ba, int startIndex)
     {
         var result = new Packet();
-        
-        result.Version = (byte)ba.GetBigEndianUInt32(VERSION_INDEX + startIndex, VERSION_LENGTH);        
-        result.PacketType = (byte)ba.GetBigEndianUInt32(PACKET_TYPE_INDEX + startIndex, PACKET_TYPE_LENGTH);
+        int bitsRead = 0;
 
-        int bitsRead = VERSION_LENGTH + PACKET_TYPE_LENGTH;
+        result.Version = (byte)ba.GetBigEndianUInt32(bitsRead + startIndex, VERSION_LENGTH);
+        bitsRead += VERSION_LENGTH;
 
-        if (result.PacketType == PACKET_TYPE_LITERAL_VALUE)
+        result.PacketType = (byte)ba.GetBigEndianUInt32(bitsRead + startIndex, PACKET_TYPE_LENGTH);
+        bitsRead += PACKET_TYPE_LENGTH;
+
+        if (result.IsLiteralValue)
         {
             ParseLiteralPacket();
         }
@@ -121,34 +132,35 @@ public struct Packet
         void ParseOperatorPacket()
         {
             // todo: fix everything in here to just use bitsRead.
-            var ltid = ba.GetBigEndianUInt32(FIRST_DATA_INDEX + startIndex, LENGTH_TYPE_ID_LENGTH);
+            var ltid = ba.GetBigEndianUInt32(bitsRead + startIndex, LENGTH_TYPE_ID_LENGTH);
             result.LengthTypeId = ltid == 0b1 ? LengthType.NumberOfSubPackets : LengthType.TotalLengthInBits;
             bitsRead += 1;
 
             if (result.LengthTypeId == LengthType.TotalLengthInBits)
             {
                 // the length will be a 15 bit number (in the next 15 bits)
-                var subPacketBitLength = ba.GetBigEndianUInt32(FIRST_DATA_INDEX + startIndex + 1, 15);
-                bitsRead += 15 + Convert.ToInt32(subPacketBitLength);
-                var subPacketBits = ba.Slice(FIRST_DATA_INDEX + startIndex + 1 + 15, Convert.ToInt32(subPacketBitLength));
-                Debug.Assert(subPacketBits.Length == 27);
+                var subPacketBitLength = ba.GetBigEndianUInt32(bitsRead + startIndex, SUBPACKETS_BIT_LENGTH_BITS_SIZE);
+                bitsRead += SUBPACKETS_BIT_LENGTH_BITS_SIZE;
+
+                var subPacketBits = ba.Slice(bitsRead + startIndex, Convert.ToInt32(subPacketBitLength));
                 var subPacketBitsRead = 0;
                 while (subPacketBitsRead < subPacketBitLength)
                 {
                     var subPacketParseResult = ParseStartingAt(subPacketBits, subPacketBitsRead);
                     result.SubPackets.Add(subPacketParseResult.packet);
                     subPacketBitsRead += subPacketParseResult.bitsRead;
+                    bitsRead += subPacketParseResult.bitsRead;
                 }
             }
             else
             {
                 // the count of subpackets will be a 11 bit number (in the next 11 bits)
-                result.DeclaredCountOfSubPackets = Convert.ToInt32(ba.GetBigEndianUInt32(FIRST_DATA_INDEX + startIndex + 1, 11));
-                bitsRead += 11;
+                result.DeclaredCountOfSubPackets = Convert.ToInt32(ba.GetBigEndianUInt32(bitsRead + startIndex, COUNT_OF_SUBPACKETS_BITS_SIZE));
+                bitsRead += COUNT_OF_SUBPACKETS_BITS_SIZE;
 
                 while (result.SubPackets.Count < result.DeclaredCountOfSubPackets)
                 {
-                    var potentialSubPacketBits = ba.Slice(bitsRead);
+                    var potentialSubPacketBits = ba.Slice(bitsRead + startIndex);
                     var subPacketParseResult = ParseStartingAt(potentialSubPacketBits, 0);
                     bitsRead += subPacketParseResult.bitsRead;
                     result.SubPackets.Add(subPacketParseResult.packet);
@@ -158,7 +170,7 @@ public struct Packet
 
         void ParseLiteralPacket()
         {
-            var readIndex = FIRST_DATA_INDEX + startIndex;
+            var readIndex = bitsRead + startIndex;
             var readMore = true;
 
             while (readMore)
@@ -176,7 +188,8 @@ public struct Packet
         }
     }
 
-
+    public int SumOfVersionsWithChildren() =>
+        Convert.ToInt32(Version) + SubPackets.Sum(p => p.SumOfVersionsWithChildren());
 
     public Packet()
     {
@@ -190,15 +203,15 @@ public struct Packet
 
     private const int READ_MORE_MASK = 0b10000;
     private const int DATA_MASK = 0b01111;
-    private const int VERSION_INDEX = 0;
     private const int VERSION_LENGTH = 3;
-    private const int PACKET_TYPE_INDEX = 3;
     private const int PACKET_TYPE_LENGTH = 3;
     private const int LENGTH_TYPE_ID_LENGTH = 1;
-    private const int FIRST_DATA_INDEX = 6;
     private const int DATA_LENGTH = 5;
     private const int PACKET_TYPE_LITERAL_VALUE = 4;
+    private const int COUNT_OF_SUBPACKETS_BITS_SIZE = 11;
+    private const int SUBPACKETS_BIT_LENGTH_BITS_SIZE = 15;
 
+    public bool IsLiteralValue => PacketType == PACKET_TYPE_LITERAL_VALUE;
     public byte Version { get; private set; }
     public byte PacketType { get; private set; }
     public BinaryNumber Data { get; private set; }
