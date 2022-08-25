@@ -250,13 +250,13 @@ public struct Packet
         switch ((PacketTypes)PacketType)
         {
             case PacketTypes.Sum:
-                return $"({string.Join(" + ", SubPackets.Select(p => p.AST()))})";
+                return $"({string.Join(" + ", SubPackets.Select(p => p.AST()))}) [ == {Value()}]";
             case PacketTypes.Product:
-                return $"({string.Join(" * ", SubPackets.Select(p => p.AST()))})";
+                return $"({string.Join(" * ", SubPackets.Select(p => p.AST()))}) [ == {Value()}]";
             case PacketTypes.Minimum:
-                return $"Min({string.Join(", ", SubPackets.Select(p => p.AST()))})";
+                return $"Min({string.Join(", ", SubPackets.Select(p => p.AST()))}) [ == {Value()}]";
             case PacketTypes.Maximum:
-                return $"Max({string.Join(", ", SubPackets.Select(p => p.AST()))})";
+                return $"Max({string.Join(", ", SubPackets.Select(p => p.AST()))}) [ == {Value()}]";
             case PacketTypes.Literal:
                 return Data.GetBigEndianULong().ToString();
             case PacketTypes.GreaterThan:
@@ -264,19 +264,19 @@ public struct Packet
                 {
                     throw new NotSupportedException($"{nameof(PacketTypes.GreaterThan)} packets must have exactly two subpackets.");
                 }
-                return $"GT({string.Join(", ", SubPackets.Select(p => p.AST()))})";
+                return $"GT({string.Join(", ", SubPackets.Select(p => p.AST()))}) [ == {Value()}]";
             case PacketTypes.LessThan:
                 if (SubPackets.Count != 2)
                 {
                     throw new NotSupportedException($"{nameof(PacketTypes.LessThan)} packets must have exactly two subpackets.");
                 }
-                return $"LT({string.Join(", ", SubPackets.Select(p => p.AST()))})";
+                return $"LT({string.Join(", ", SubPackets.Select(p => p.AST()))}) [ == {Value()}]";
             case PacketTypes.EqualTo:
                 if (SubPackets.Count != 2)
                 {
                     throw new NotSupportedException($"{nameof(PacketTypes.EqualTo)} packets must have exactly two subpackets.");
                 }
-                return $"EQ({string.Join(", ", SubPackets.Select(p => p.AST()))})";
+                return $"EQ({string.Join(", ", SubPackets.Select(p => p.AST()))}) [ == {Value()}]";
             default:
                 throw new NotSupportedException($"Unknown Packet Type {PacketType}");
         }

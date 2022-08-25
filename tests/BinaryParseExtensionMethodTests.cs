@@ -91,6 +91,16 @@ namespace tests
             ba.GetBigEndianUInt32(startIndex, length).Should().Be(expected);
         }
 
+        [Fact]
+        public void ShiftLeftWorksAsExpected()
+        {
+            var ba = new BitArray(64);
+            ba.SetAll(true);
+            ba.GetBigEndianULong().Should().Be(ulong.MaxValue);
+            ba.ShiftLeft(1);
+            ba.GetBigEndianULong().Should().Be(ulong.MaxValue - 1);
+        }
+
         [Theory]
         [InlineData("10110", 22)]
         [InlineData("01001", 9)]

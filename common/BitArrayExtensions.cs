@@ -236,8 +236,8 @@ namespace common.BitArrayExtensionMethods
             {
                 throw new ArgumentException(message: $"The {nameof(GetBigEndianULong)} extension method does not support getting a length of more than 64 bits.", paramName: nameof(ba));
             }
-            var result = 0u;
-            var bit = 1u;
+            var result = 0ul;
+            var bit = 1ul;
             for (var i = startIndex + length - 1; i >= startIndex; i--)
             {
                 if (ba.Get(i))
