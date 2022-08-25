@@ -220,5 +220,47 @@ namespace common.BitArrayExtensionMethods
             }
             return result;
         }
+        /// <summary>
+        /// Returns a new <see cref="BitArray"/> with the content of <paramref name="ba"/> starting from
+        /// <paramref name="startIndex"/> to the end.  Does not mutate <paramref name="ba"/>.
+        /// </summary>
+        public static BitArray Slice(this BitArray ba, int startIndex)
+        {
+            var length = ba.Length - startIndex;
+            return ba.Slice(startIndex, length);
+        }
+
+
+        /// <summary>
+        /// Returns a new <see cref="BitArray"/> with the content of <paramref name="ba"/> starting from
+        /// <paramref name="startIndex"/> with length <paramref name="length"/>.  Does not mutate <paramref name="ba"/>.
+        /// </summary>
+        public static BitArray Slice(this BitArray ba, int startIndex, int length)
+        {
+            var result = new BitArray(length);
+            for (var i = 0; i < length; i++)
+            {
+                result.Set(i, ba.Get(i + startIndex));
+            }
+            return result;
+        }
+
+        public static void ShiftLeft(this BitArray ba, int count)
+        {
+            if (count == 0)
+            {
+                return;
+            }
+            // todo: check other boundary conditions.
+
+            for (var i = 0; i < 32 - count; i++)
+            {
+                ba.Set(i, ba.Get(i + count));
+            }
+            for (var i = 32 - count; i < 32; i++)
+            {
+                ba.Set(i, false);
+            }
+        }
     }
 }
