@@ -288,7 +288,16 @@ namespace common.BitArrayExtensionMethods
             {
                 return;
             }
-            // todo: check other boundary conditions.
+            if (count < 0)
+            {
+                throw new NotSupportedException("Can't use this method to shift left a negative amount.  TODO: make a shift right.");
+            }
+            if (count >= ba.Length)
+            {
+                // since this will overflow all the bits, we just set the underflow to 0 and return.
+                ba.SetAll(false);
+                return;
+            }
 
             for (var i = 0; i < ba.Length - count; i++)
             {

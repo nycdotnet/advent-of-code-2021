@@ -92,13 +92,23 @@ namespace tests
         }
 
         [Fact]
-        public void ShiftLeftWorksAsExpected()
+        public void ShiftLeftSetsUnderflowToZero()
         {
             var ba = new BitArray(64);
             ba.SetAll(true);
             ba.GetBigEndianULong().Should().Be(ulong.MaxValue);
             ba.ShiftLeft(1);
             ba.GetBigEndianULong().Should().Be(ulong.MaxValue - 1);
+        }
+
+        [Fact]
+        public void ShiftLeftWhenOverShiftedReturnsAllZeros()
+        {
+            var ba = new BitArray(64);
+            ba.SetAll(true);
+            ba.GetBigEndianULong().Should().Be(ulong.MaxValue);
+            ba.ShiftLeft(64);
+            ba.GetBigEndianULong().Should().Be(0);
         }
 
         [Theory]
