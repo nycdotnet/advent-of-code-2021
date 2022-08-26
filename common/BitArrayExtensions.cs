@@ -276,6 +276,12 @@ namespace common.BitArrayExtensionMethods
             return result;
         }
 
+        /// <summary>
+        /// Mutates a <see cref="BitArray"/> by shifting its bits left by <paramref name="count"/> places.
+        /// Overflow bits are discarded.  Underflow bits are set to 0.  Runs in linear time based on the size
+        /// of the <see cref="BitArray"/>, but operates on one bit at a time so I'm fairly certain this could be
+        /// optimized.
+        /// </summary>
         public static void ShiftLeft(this BitArray ba, int count)
         {
             if (count == 0)
