@@ -27,7 +27,6 @@ int GetOptimalHorizontalPositionWithLinearFuelUse(string file)
     return fuelUsed;
 }
 
-
 int GetOptimalHorizontalPositionFuelUsedWithScalingFuelUsage(string file)
 {
     Console.WriteLine($"Solving Advent Of Code 2021 Day 7 Part 2 using {file}.");
