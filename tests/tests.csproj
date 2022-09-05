@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\adventofcode2021-dec18\adventofcode2021-dec18.csproj" />
     <ProjectReference Include="..\common\common.csproj" />
   </ItemGroup>
 

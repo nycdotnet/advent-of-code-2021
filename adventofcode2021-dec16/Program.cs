@@ -137,7 +137,7 @@ public class BinaryNumber
         }
         if (BitLength > 0)
         {
-            Data.ShiftLeft(4);
+            Data.ShiftLeftBE(4);
         }
         var setIndex = 64 - 1;
         Data.Set(setIndex--, (nibble & 1) == 1);
