@@ -3,6 +3,7 @@ using FluentAssertions;
 using System;
 using System.Collections;
 using System.Collections.Specialized;
+using System.Text;
 using Xunit;
 
 namespace tests
@@ -91,13 +92,107 @@ namespace tests
             ba.GetBigEndianUInt32(startIndex, length).Should().Be(expected);
         }
 
+        // see: https://github.com/dotnet/runtime/issues/73094
+        [Fact]
+        public void Issue73094_ba2h()
+        {
+            var source = new byte[] { 0x7F, 0x00, 0xFF, 0x00, 0xFF };
+            var b = new BitArray(source);
+            
+            Assert.Equal("7F00FF00FF", BitArrayToHex2(b));
+
+            string BitArrayToHex2(BitArray bits)
+            {
+                if (bits.Length % 8 != 0)
+                {
+                    throw new NotSupportedException("This method only supports BitArrays with a length evenly divisible by 8.");
+                }
+                var sb = new StringBuilder(bits.Length / 4);
+
+                // NOTE: I think this only works if the length is evenly divisible by 8.
+                for (int i = 0; i < bits.Length; i += 8)
+                {
+                    int v = (bits[i + 7] ? 128 : 0) |
+                        (bits[i + 6] ? 64 : 0) |
+                        (bits[i + 5] ? 32 : 0) |
+                        (bits[i + 4] ? 16 : 0) |
+                        (bits[i + 3] ? 8 : 0) |
+                        (bits[i + 2] ? 4 : 0) |
+                        (bits[i + 1] ? 2 : 0) |
+                        (bits[i + 0] ? 1 : 0);
+
+                    _ = sb.Append(v.ToString("X2"));
+                }
+
+                return sb.ToString();
+            }
+        }
+
+        [Fact]
+        public void Issue73094Small()
+        {
+            var source = new byte[] { 0x7F, 0x00, 0xFF, 0x00, 0xFF };
+            var b = new BitArray(source);
+
+            var initialString = formatBitArraySimple(b);
+
+            var result = b.LeftShift(3);
+
+            var expectedString = "000" + initialString.Substring(0, initialString.Length - 3);
+
+            Assert.Equal(expectedString, formatBitArraySimple(b));
+            Assert.Equal(expectedString, formatBitArraySimple(result));
+        }
+
+        [Fact]
+        public void Issue73094()
+        {
+            var x = 1;
+            x <<= 1;
+            Assert.Equal(2, x);
+
+            var baExample = new BitArray(3);
+            baExample.Set(1, true);
+            baExample.RightShift(1);
+            var rs = formatBitArraySimple(baExample);
+
+
+            var source = new byte[] { 0x7F, 0x00, 0xFF, 0x00, 0xFF };
+
+            // we want to shift from zero to the length in bits, hence Length * 8 as the max
+            for (var i = 0; i <= source.Length * 8; i++)
+            {
+                var b = new BitArray(source);
+                var initialString = formatBitArraySimple(b);
+
+                var result = b.LeftShift(i);
+
+                var expectedString = new string('0', i) + initialString.Substring(0, initialString.Length - i);
+
+                Assert.Equal(expectedString, formatBitArraySimple(b));
+                Assert.Equal(expectedString, formatBitArraySimple(result));
+                Assert.Equal(40, expectedString.Length);
+            }
+        }
+
+        private string formatBitArraySimple(BitArray ba)
+        {
+            var sb = new StringBuilder(ba.Length);
+            for (var i = 0; i < ba.Length; i++)
+            {
+                sb.Append(ba.Get(i) ? '1' : '0');
+            }
+            return sb.ToString();
+        }
+
         [Fact]
         public void ShiftLeftSetsUnderflowToZero()
         {
             var ba = new BitArray(64);
             ba.SetAll(true);
             ba.GetBigEndianULong().Should().Be(ulong.MaxValue);
-            ba.ShiftLeft(1);
+            ba.ShiftLeftBE(1);
+            ba.Format().Should().Be("1111111111111111111111111111111111111111111111111111111111111110");
             ba.GetBigEndianULong().Should().Be(ulong.MaxValue - 1);
         }
 
@@ -107,7 +202,7 @@ namespace tests
             var ba = new BitArray(64);
             ba.SetAll(true);
             ba.GetBigEndianULong().Should().Be(ulong.MaxValue);
-            ba.ShiftLeft(64);
+            ba.ShiftLeftBE(64);
             ba.GetBigEndianULong().Should().Be(0);
         }
 

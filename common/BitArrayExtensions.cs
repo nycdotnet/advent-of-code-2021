@@ -280,9 +280,10 @@ namespace common.BitArrayExtensionMethods
         /// Mutates a <see cref="BitArray"/> by shifting its bits left by <paramref name="count"/> places.
         /// Overflow bits are discarded.  Underflow bits are set to 0.  Runs in linear time based on the size
         /// of the <see cref="BitArray"/>, but operates on one bit at a time so I'm fairly certain this could be
-        /// optimized.
+        /// optimized.  NOTE: This is #1 not needed (it's actually in the framework since .NET 6) and #2 apparently
+        /// the opposite of how the framework version works!!
         /// </summary>
-        public static void ShiftLeft(this BitArray ba, int count)
+        public static void ShiftLeftBE(this BitArray ba, int count)
         {
             if (count == 0)
             {
