@@ -132,5 +132,57 @@ namespace tests
             a.ToString().Should().Be(expectedNumber);
             a.GetPairs().Count().Should().Be(expectedPairCount);
         }
+
+        [Fact]
+        public void SplitOnLeftSideWorks()
+        {
+            var n = SnailfishNumber.Parse("[11,[1,2]]");
+            n.Reduce(1);
+            n.ToString().Should().Be("[[5,6],[1,2]]");
+        }
+
+        [Fact]
+        public void SplitOnRightSideWorks()
+        {
+            var n = SnailfishNumber.Parse("[[1,2],11]");
+            n.Reduce(1);
+            n.ToString().Should().Be("[[1,2],[5,6]]");
+        }
+
+        [Theory]
+        [InlineData("[[[[0,7],4],[15,[0,13]]],[1,1]]", "[[[[0,7],4],[[7,8],[0,13]]],[1,1]]", 8)]
+        [InlineData("[[[[0,7],4],[[7,8],[0,13]]],[1,1]]", "[[[[0,7],4],[[7,8],[0,[6,7]]]],[1,1]]", 9)]
+        public void SplitExamples(string input, string expectedNumber, int expectedPairCount)
+        {
+            var a = SnailfishNumber.Parse(input);
+            a.Reduce(1);
+            a.ToString().Should().Be(expectedNumber);
+            a.GetPairs().Count().Should().Be(expectedPairCount);
+        }
+
+        [Fact]
+        public void FinalExampleSingleStepReduce()
+        {
+            var a = SnailfishNumber.Parse("[[[[4,3],4],4],[7,[[8,4],9]]]");
+            var b = SnailfishNumber.Parse("[1,1]");
+
+            var sum = SnailfishNumber.AddWithoutReduce(a, b);
+            sum.ToString().Should().Be("[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]");
+            sum.Reduce(1);
+
+            sum.ToString().Should().Be("[[[[0,7],4],[7,[[8,4],9]]],[1,1]]");
+            sum.Reduce(1);
+
+            sum.ToString().Should().Be("[[[[0,7],4],[15,[0,13]]],[1,1]]");
+            sum.Reduce(1);
+
+            sum.ToString().Should().Be("[[[[0,7],4],[[7,8],[0,13]]],[1,1]]");
+            sum.Reduce(1);
+
+            sum.ToString().Should().Be("[[[[0,7],4],[[7,8],[0,[6,7]]]],[1,1]]");
+            sum.Reduce(1);
+
+            sum.ToString().Should().Be("[[[[0,7],4],[[7,8],[6,0]]],[8,1]]");
+        }
     }
 }

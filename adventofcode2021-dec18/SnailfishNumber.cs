@@ -50,7 +50,20 @@ namespace adventofcode2021_dec18
 
         private bool TryReduce()
         {
-            return OuterPair.TryReduce();
+            var explodeResult = OuterPair.TryExplode();
+            if (explodeResult)
+            {
+                return true;
+            }
+            var splitResult = OuterPair.TrySplit();
+            if (splitResult)
+            {
+                var newNumber = Parse(ToString());
+                OuterPair = newNumber.OuterPair;
+                OuterPair.Rehome(this);
+                return true;
+            }
+            return false;
         }
 
         public static SnailfishNumber AddWithoutReduce(SnailfishNumber a, SnailfishNumber b)
@@ -77,7 +90,7 @@ namespace adventofcode2021_dec18
             /// <summary>
             /// Reference to the outer <see cref="SnailfishNumber"/>.
             /// </summary>
-            public SnailfishNumber Number { get; init; }
+            public SnailfishNumber Number { get; internal set; }
             /// <summary>
             /// The zero-based index of the [ character of this pair.
             /// </summary>
@@ -268,7 +281,7 @@ namespace adventofcode2021_dec18
                 throw new NotSupportedException("Unexpected end of content.");
             }
 
-            internal bool TryReduce()
+            internal bool TryExplode()
             {
                 if (IsNestedInFourOrMorePairs())
                 {
@@ -316,7 +329,7 @@ namespace adventofcode2021_dec18
 
                 if (Left is Pair left)
                 {
-                    var reduced = left.TryReduce();
+                    var reduced = left.TryExplode();
                     if (reduced)
                     {
                         return true;
@@ -325,7 +338,7 @@ namespace adventofcode2021_dec18
 
                 if (Right is Pair right)
                 {
-                    var reduced = right.TryReduce();
+                    var reduced = right.TryExplode();
                     if (reduced)
                     {
                         return true;
@@ -351,6 +364,55 @@ namespace adventofcode2021_dec18
                 }
             }
 
+            internal bool TrySplit()
+            {
+                if (Left is int leftInt && leftInt >= 10)
+                {
+                    Left = new Pair
+                    {
+                        Left = (int)Math.Floor(leftInt / 2.0),
+                        Right = (int)Math.Ceiling(leftInt / 2.0),
+                        Number = Number,
+                        Parent = this,
+                        Side = SnailfishNumber.Side.Left,
+                    };
+                    return true;
+                }
+
+                if (Right is int rightInt && rightInt >= 10)
+                {
+                    Right = new Pair
+                    {
+                        Left = (int)Math.Floor(rightInt / 2.0),
+                        Right = (int)Math.Ceiling(rightInt / 2.0),
+                        Number = Number,
+                        Parent = this,
+                        Side = SnailfishNumber.Side.Right
+                    };
+                    return true;
+                }
+
+                if (Left is Pair leftPair)
+                {
+                    var split = leftPair.TrySplit();
+                    if (split)
+                    {
+                        return true;
+                    }
+                }
+
+                if (Right is Pair rightPair)
+                {
+                    var split = rightPair.TrySplit();
+                    if (split)
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
             internal void Index()
             {
                 Number.AddPair(this);
@@ -361,6 +423,19 @@ namespace adventofcode2021_dec18
                 if (Right is Pair right)
                 {
                     right.Index();
+                }
+            }
+
+            internal void Rehome(SnailfishNumber snailfishNumber)
+            {
+                Number = snailfishNumber;
+                if (Left is Pair left)
+                {
+                    left.Rehome(snailfishNumber);
+                }
+                if (Right is Pair right)
+                {
+                    right.Rehome(snailfishNumber);
                 }
             }
         }
