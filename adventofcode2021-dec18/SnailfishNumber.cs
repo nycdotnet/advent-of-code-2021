@@ -24,22 +24,49 @@ namespace adventofcode2021_dec18
                 _Pairs = new()
             };
             result.OuterPair = Pair.Parse(s, result, out int _, 0, null);
-            
+
             return result;
         }
 
-        public void Reduce(int maxIterations = -1)
+        public void Reduce(int maxIterations = -1, StringBuilder logger = null)
         {
-            int iterations = 0;
-            while(TryReduce())
+            int iterationCount = 0;
+            while (TryReduce())
             {
-                iterations += 1;
-                Reindex();
-                if (iterations == maxIterations)
+                if (logger != null)
+                {
+                    var currentString = ToString();
+                    logger.AppendLine($"After {iterationCount} reduction: {currentString} {Prediction(currentString)}");
+                }
+                
+                iterationCount += 1;
+                Rebuild();
+                
+                if (iterationCount == maxIterations)
                 {
                     return;
                 }
             }
+            logger?.AppendLine($"Reduction complete after {iterationCount} iterations!");
+        }
+
+        private string Prediction(string currentString)
+        {
+            var depth = 0;
+            for (var i = 0; i < currentString.Length; i++)
+            {
+                depth += currentString[i] switch
+                {
+                    '[' => 1,
+                    ']' => -1,
+                    _ => 0
+                };
+                if (depth > 4)
+                {
+                    return $"explode at ${i+1}";
+                }
+            }
+            return "either split or done.";
         }
 
         private void Reindex()
@@ -58,18 +85,27 @@ namespace adventofcode2021_dec18
             var splitResult = OuterPair.TrySplit();
             if (splitResult)
             {
-                var newNumber = Parse(ToString());
-                OuterPair = newNumber.OuterPair;
-                OuterPair.Rehome(this);
                 return true;
             }
             return false;
         }
 
-        public static SnailfishNumber AddWithoutReduce(SnailfishNumber a, SnailfishNumber b)
+        private void Rebuild()
         {
-            var resultString = $"[{a},{b}]";
-            return Parse(resultString);
+            var newNumber = Parse(ToString());
+            OuterPair = newNumber.OuterPair;
+            OuterPair.Rehome(this);
+            Reindex();
+        }
+
+
+        public static SnailfishNumber AddWithoutReduce(SnailfishNumber a, SnailfishNumber b) => Parse($"[{a},{b}]");
+
+        public static SnailfishNumber Add(SnailfishNumber a, SnailfishNumber b)
+        {
+            var result = AddWithoutReduce(a, b);
+            result.Reduce();
+            return result;
         }
 
         public override string ToString() => OuterPair.ToString();
@@ -174,6 +210,9 @@ namespace adventofcode2021_dec18
                 get => Right is int right ? right : null;
                 set => Right = value;
             }
+
+            public long GetMagnitude() => (3L * (long)(Left is Pair left ? left.GetMagnitude() : LeftAsInt ?? 0)) +
+                (2L * (Right is Pair right ? right.GetMagnitude() : RightAsInt ?? 0));
 
             public override string ToString()
             {
@@ -378,6 +417,14 @@ namespace adventofcode2021_dec18
                     };
                     return true;
                 }
+                else if (Left is Pair leftPair)
+                {
+                    var split = leftPair.TrySplit();
+                    if (split)
+                    {
+                        return true;
+                    }
+                }
 
                 if (Right is int rightInt && rightInt >= 10)
                 {
@@ -391,17 +438,7 @@ namespace adventofcode2021_dec18
                     };
                     return true;
                 }
-
-                if (Left is Pair leftPair)
-                {
-                    var split = leftPair.TrySplit();
-                    if (split)
-                    {
-                        return true;
-                    }
-                }
-
-                if (Right is Pair rightPair)
+                else  if (Right is Pair rightPair)
                 {
                     var split = rightPair.TrySplit();
                     if (split)
