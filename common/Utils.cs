@@ -9,7 +9,7 @@
             .Select(x => int.Parse(x));
 
         /// <summary>
-        /// Gets the lines from the specified file relative to the project folder
+        /// Gets the lines from the specified file relative to the project folder, removing empty lines
         /// </summary>
         public static string[] GetLines(string fileName) =>
             File.ReadAllText(Path.Combine(ProjectFolder(), fileName))
